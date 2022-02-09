@@ -1,0 +1,174 @@
+#!/bin/bash
+
+# Create a commit-msg file
+create_commit_msg_file() {                  # Pass name of the hook file as 1st parameter
+  if [ -f "$1" ]; then
+    mv "$1" "$1.bak"                        # Make a backup if the hook already exists
+  fi
+  cat > "$1" <<EOF
+#!/bin/bash
+
+# List of Jira projects whose keys will be accepted by the hook.
+# The installation procedure creates a RegExp of a comma separated list of project keys.
+# PROJECTS="(DS|MYJIRA|MARS)"               # Accept issue keys like DS-17 or MARS-6
+# PROJECTS="(MYJIRA)"                       # Accept only issue keys that start with MYJIRA, like MYJIRA-1966
+# PROJECTS="MYJIRA"                         # Same as "(MYJIRA)"
+# PROJECTS=""                               # Accept every issue key matching [[:alpha:]]+-[[:digit:]]+
+
+PROJECTS="$PROJECTS"
+
+# Add git branch if relevant
+parse_git_branch() {
+  if [ -n "\$PROJECTS" ]; then
+    # Parse the current branch name for an issue where the project key matches the regular expression in PROJECTS
+    git branch 2>/dev/null | \\
+        sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/' | \\
+        grep --ignore-case --extended-regexp --regexp="\${PROJECTS}-[[:digit:]]+" --only-matching | \\
+        tr '[:lower:]' '[:upper:]'
+  else
+    # Parse the current branch for any issue key
+    git branch 2>/dev/null | \\
+        sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/' | \\
+        tr '[:lower:]' '[:upper:]'
+  fi
+}
+
+# Extact ticket number (e.g. DS-123) from first line of the commit message
+parse_first_message_line_for_tickets() {    # Pass the name of a file with the commit message as 1st parameter
+  if [ -n "\$PROJECTS" ]; then
+    # Parse the first line of the commit message for an issue where the project key matches the regular expression in PROJECTS
+    head --lines=1 "\$1" | \\
+        grep --ignore-case --extended-regexp --regexp="\${PROJECTS}-[[:digit:]]+" --only-matching | \\
+        tr '[:lower:]' '[:upper:]'
+  else
+    # Parse the first line of the commit message for any issue key
+    head --lines=1 "\$1" | \\
+        grep --extended-regexp --regexp='[[:alpha:]]+-[[:digit:]]+' --only-matching | \\
+        tr '[:lower:]' '[:upper:]'
+  fi
+}
+
+BRANCH_TICKET=\$(parse_git_branch)
+CM_TICKETS=\$(parse_first_message_line_for_tickets "\$1")
+
+# Check if the branch contains a valid issue that does not appear in the 1st line of the commit message.
+if [[ "\$BRANCH_TICKET" != "" && ! "\$CM_TICKETS" =~ \$BRANCH_TICKET ]]; then
+  MESSAGE=\$(cat "\$1")
+  echo "New commit message: [\$BRANCH_TICKET] \$MESSAGE"
+  echo "[\$BRANCH_TICKET] \$MESSAGE" >"\$1"      # Let the commit message start with the issue key found in the branch
+  exit 0
+fi
+
+if [ -z "\$CM_TICKETS" ]; then              # Found valid issue keys in commit message?
+  if [ -n "\$PROJECTS" ]; then
+    echo >&2 "ERROR: The 1st line of the commit message is missing a Jira issue key matching '\$PROJECTS'"
+  else
+    echo >&2 "ERROR: The 1st line of the commit message is missing a Jira issue key (e.g. DS-123)."
+  fi
+  exit 1
+fi
+
+EOF
+
+  chmod +x "$1"
+}
+
+check_creation_commit_msg_file() {          # Pass the name of a Git repository folder as 1st parameter
+  HOOK_FILE="$1/.git/hooks/commit-msg"
+  echo -n "  create   '$HOOK_FILE'"
+  if [[ -e "$HOOK_FILE" && $REPLACE_ALL == 0 ]]; then
+    echo -e "\rreplace '$HOOK_FILE'? ([Y]es / [n]o / [a]all)"
+    read ANSWER
+    ANSWER_LC=$(echo $ANSWER | tr '[:upper:]' '[:lower:]' | cut -c1)
+    if [ $ANSWER_LC == "a" ]; then
+      REPLACE_ALL=1
+    fi
+    if [[ "yj" =~ "$ANSWER_LC" || $REPLACE_ALL == 1 ]]; then
+      create_commit_msg_file "$HOOK_FILE"
+      echo -e "\r✅ replaced '$HOOK_FILE'"
+    else
+      echo -e "\r❌ skipped  '$HOOK_FILE'"
+    fi
+  else
+    create_commit_msg_file "$HOOK_FILE"
+    echo -e "\r✅ created  '$HOOK_FILE'"
+  fi
+}
+
+# Install git hook commit-msg
+install_git_hook() {                        # Pass the name of a Git repository folder as 1st parameter
+  if [ ! -d "$1/.git/hooks" ]; then
+    echo >&2 "❌ ERROR:  '$1' has no folder .git/hooks"
+  else
+    check_creation_commit_msg_file "$1"
+  fi
+}
+
+# Print a help message
+usage() {
+  echo "Usage: ${0##*/} [ OPTIONS ] [ dir ... ]" 1>&2
+  echo -e "\nInstall a Git hook to search for a Jira issue key" 1>&2
+  echo -e "in the commit message or branch name." 1>&2
+  echo -e "\nOptions:" 1>&2
+  if [[ $GNU_GETOPT == 1 ]]; then
+    echo -e "  -y, --yes       Override existing commit-msg files" 1>&2
+    echo -e "  -p, --projects  Let the hook only accept keys for these Jira projects" 1>&2
+    echo -e "                  e.g. --projects=DS,MYJIRA,MARS" 1>&2
+    echo -e "  -h, --help      Show this help" 1>&2
+  else
+    echo -e "  -y      Override existing commit-msg files" 1>&2
+    echo -e "  -p      Let the hook only accept keys for these Jira projects" 1>&2
+    echo -e "          e.g. --projects=DS,MYJIRA,MARS" 1>&2
+    echo -e "  -h      Show this help" 1>&2
+    echo -e "\nWarning: Please install GNU getopt to be able to pass folders with blank in the name (e.g. under macOS: brew install gnu-getopt)" 1>&2
+  fi
+}
+
+# Test if a GNU like getopt is available
+test_gnu_getopt() {
+  out=$(getopt -T)
+  if (( $? != 4 )) && [[ -n $out ]]; then
+    GNU_GETOPT=0
+  else
+    GNU_GETOPT=1
+  fi
+}
+
+REPLACE_ALL=0                               # Variable to store if hooks found should be replaced
+
+test_gnu_getopt
+if [[ "$GNU_GETOPT" == 1 ]]; then
+  # Chakka, we can use long option names
+  args=$(getopt --options yp:h --long yes,projects:,help --name "${0##*/}" -- "$@")
+else
+  args=`getopt yp:h "$@"`                   # macOS users could install gnu-getopt with brew ...
+fi
+if [ $? != 0 ]; then                        # Check if only valid options were passed
+  usage
+  exit 2
+fi
+
+eval set -- "$args"                         # Replace the calling parameters with the easy parseable output of getopt
+
+while true; do
+  case "$1" in
+    -y | --yes ) REPLACE_ALL=1; shift ;;
+    -p | --projects ) PROJECTS=$(echo "($2)" | sed -e 's/,/|/g'); shift 2;;
+    -h | --help ) usage; exit 0 ;;
+    -- ) shift; break ;;
+    * ) break ;;  esac
+done
+
+if [ -z "$1" ]; then
+  # The installation is called w/o Git repository folder names, so it will take the current folder
+  GIT_REPO_ROOT=$(git rev-parse --show-toplevel)      # Find the root of the repository of the current folder
+  install_git_hook "$GIT_REPO_ROOT"
+else
+  for i in "$@" ; do
+    if [ -d "$i" ]; then
+      install_git_hook "$i"                 # Install the hook in the potential Git repository
+    else
+      echo "   skipped  '$i' (is not a folder)"
+    fi
+  done
+fi
