@@ -77,7 +77,7 @@ check_creation_commit_msg_file() {          # Pass the name of a Git repository 
   HOOK_FILE="$1/.git/hooks/commit-msg"
   echo -n "  create   '$HOOK_FILE'"
   if [[ -e "$HOOK_FILE" && $REPLACE_ALL == 0 ]]; then
-    echo -e "\rreplace '$HOOK_FILE'? ([Y]es / [n]o / [a]all)"
+    echo -e "\rreplace '$HOOK_FILE'? ([Y]es / [n]o / [a]ll)"
     read ANSWER
     ANSWER_LC=$(echo $ANSWER | tr '[:upper:]' '[:lower:]' | cut -c1)
     if [ $ANSWER_LC == "a" ]; then
