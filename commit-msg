@@ -13,14 +13,12 @@ PROJECTS=""
 parse_git_branch() {
   if [ -n "$PROJECTS" ]; then
     # Parse the current branch name for an issue where the project key matches the regular expression in PROJECTS
-    git branch 2>/dev/null | \
-        sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/' | \
-        grep --ignore-case --extended-regexp --regexp="${PROJECTS}-[[:digit:]]+" --only-matching | \
+    git rev-parse --abbrev-ref HEAD 2>/dev/null | \
+        grep --ignore-case --extended-regexp --regexp="\<${PROJECTS}-[[:digit:]]+\>" --only-matching | \
         tr '[:lower:]' '[:upper:]'
   else
     # Parse the current branch for any issue key
-    git branch 2>/dev/null | \
-        sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/' | \
+    git rev-parse --abbrev-ref HEAD 2>/dev/null | \
         tr '[:lower:]' '[:upper:]'
   fi
 }
@@ -30,7 +28,7 @@ parse_first_message_line_for_tickets() {    # Pass the name of a file with the c
   if [ -n "$PROJECTS" ]; then
     # Parse the first line of the commit message for an issue where the project key matches the regular expression in PROJECTS
     head --lines=1 "$1" | \
-        grep --ignore-case --extended-regexp --regexp="${PROJECTS}-[[:digit:]]+" --only-matching | \
+        grep --ignore-case --extended-regexp --regexp="\<${PROJECTS}-[[:digit:]]+\>" --only-matching | \
         tr '[:lower:]' '[:upper:]'
   else
     # Parse the first line of the commit message for any issue key
@@ -59,4 +57,3 @@ if [ -z "$CM_TICKETS" ]; then              # Found valid issue keys in commit me
   fi
   exit 1
 fi
-
