@@ -58,8 +58,8 @@ if [[ "\$BRANCH_TICKET" != "" && ! "\$CM_TICKETS" =~ \$BRANCH_TICKET ]]; then
   exit 0
 fi
 
-# Check if commit message contains valid issue keys or 'Merge branch'?
-if [[ "\$CM_TICKETS" == "" && ! \$FIRST_LINE =~ "Merge branch" ]]; then
+# Check if commit message contains valid issue keys or 'Merge'?
+if [[ "\$CM_TICKETS" == "" && ! \$FIRST_LINE =~ "Merge" ]]; then
   if [ -n "\$PROJECTS" ]; then
     echo >&2 "ERROR: The 1st line of the commit message is missing a Jira issue key matching '\$PROJECTS'"
   else

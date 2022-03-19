@@ -2,7 +2,7 @@
 
 This repository includes a Git hook to prevent commits without a Jira issue key in the ***first line*** of a commit message.
 
-The Git generated merge commit messages that start with **Merge branch** are always accepted.
+The Git generated merge commit messages that start with **Merge** are always accepted.
 
 If you are working on a branch that contains an issue key in its name, for example `feature/DS-17`, the commit message will be enhanced with that key at the beginning. Of course, only if the first line does not already contain that key.
 
