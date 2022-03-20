@@ -1,12 +1,11 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 # Create a commit-msg file
 create_commit_msg_file() {                  # Pass name of the hook file as 1st parameter
   if [ -f "$1" ]; then
     mv "$1" "$1.bak"                        # Make a backup if the hook already exists
   fi
   cat > "$1" <<EOF
-#!/bin/bash
+#!/usr/bin/env bash
 
 # List of Jira projects whose keys will be accepted by the hook.
 # The installation procedure creates a RegExp of a comma separated list of project keys.
@@ -16,6 +15,12 @@ create_commit_msg_file() {                  # Pass name of the hook file as 1st 
 # PROJECTS=""                               # Accept every issue key matching [[:alpha:]]+-[[:digit:]]+
 
 PROJECTS="$PROJECTS"
+
+if [[ "\$PROJECTS" == "" ]]; then
+  # find if and where user.jiraProjects is set with
+  # git config --show-origin user.jiraProjects
+  PROJECTS=\$(git config --get user.jiraProjects)
+fi
 
 # Add git branch if relevant
 parse_git_branch() {
@@ -74,16 +79,16 @@ EOF
 }
 
 check_creation_commit_msg_file() {          # Pass the name of a Git repository folder as 1st parameter
-  HOOK_FILE="$1/.git/hooks/commit-msg"
+  HOOK_FILE="$1/commit-msg"
   echo -n "  create   '$HOOK_FILE'"
   if [[ -e "$HOOK_FILE" && $REPLACE_ALL == 0 ]]; then
     echo -e "\rreplace '$HOOK_FILE'? ([Y]es / [n]o / [a]ll)"
-    read ANSWER
-    ANSWER_LC=$(echo $ANSWER | tr '[:upper:]' '[:lower:]' | cut -c1)
-    if [ $ANSWER_LC == "a" ]; then
+    read -r ANSWER
+    ANSWER_LC=$(echo "$ANSWER" | tr '[:upper:]' '[:lower:]' | cut -c1)
+    if [[ "$ANSWER_LC" == "a" ]]; then
       REPLACE_ALL=1
     fi
-    if [[ "yj" =~ "$ANSWER_LC" || $REPLACE_ALL == 1 ]]; then
+    if [[ "yj" =~ $ANSWER_LC || "$REPLACE_ALL" == 1 ]]; then
       create_commit_msg_file "$HOOK_FILE"
       echo -e "\r✅ replaced '$HOOK_FILE'"
     else
@@ -96,9 +101,9 @@ check_creation_commit_msg_file() {          # Pass the name of a Git repository 
 }
 
 # Install git hook commit-msg
-install_git_hook() {                        # Pass the name of a Git repository folder as 1st parameter
-  if [ ! -d "$1/.git/hooks" ]; then
-    echo >&2 "❌ ERROR:  '$1' has no folder .git/hooks"
+install_git_hook() {                        # Pass the name of a Git repository hooks folder as 1st parameter
+  if [[ ! -d "$1" ]]; then
+    echo >&2 "❌ ERROR:  '$1' is not a folder"
   else
     check_creation_commit_msg_file "$1"
   fi
@@ -143,7 +148,7 @@ if [[ "$GNU_GETOPT" == 1 ]]; then
 else
   args=`getopt yp:h "$@"`                   # macOS users could install gnu-getopt with brew ...
 fi
-if [ $? != 0 ]; then                        # Check if only valid options were passed
+if [[ $? != 0 ]]; then                        # Check if only valid options were passed
   usage
   exit 2
 fi
@@ -159,14 +164,22 @@ while true; do
     * ) break ;;  esac
 done
 
-if [ -z "$1" ]; then
-  # The installation is called w/o Git repository folder names, so it will take the current folder
-  GIT_REPO_ROOT=$(git rev-parse --show-toplevel)      # Find the root of the repository of the current folder
-  install_git_hook "$GIT_REPO_ROOT"
+if [[ "$1" == "" ]]; then
+  HOOKS_PATH=$(git config --get core.hooksPath)
+  HOOKS_PATH=${HOOKS_PATH/\~/"$HOME"}
+  if [[ "$HOOKS_PATH" != "" ]]; then
+    echo "core.hooksPath is set, so the script will be installed there"
+    git config --show-origin core.hooksPath
+    install_git_hook "${HOOKS_PATH}"
+  else
+    # The installation is called w/o Git repository folder names, so it will take the current folder
+    GIT_REPO_ROOT=$(git rev-parse --show-toplevel)      # Find the root of the repository of the current folder
+    install_git_hook "${GIT_REPO_ROOT}/.git/hooks"
+  fi
 else
   for i in "$@" ; do
-    if [ -d "$i" ]; then
-      install_git_hook "$i"                 # Install the hook in the potential Git repository
+    if [[ -d "$i" ]]; then
+      install_git_hook "$i/.git/hooks"                 # Install the hook in the potential Git repository
     else
       echo "   skipped  '$i' (is not a folder)"
     fi

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # List of Jira projects whose keys will be accepted by the hook.
 # The installation procedure creates a RegExp of a comma separated list of project keys.
@@ -8,6 +8,12 @@
 # PROJECTS=""                               # Accept every issue key matching [[:alpha:]]+-[[:digit:]]+
 
 PROJECTS=""
+
+if [[ "$PROJECTS" == "" ]]; then
+  # find if and where user.jiraProjects is set with
+  # git config --show-origin user.jiraProjects
+  PROJECTS=$(git config --get user.jiraProjects)
+fi
 
 # Add git branch if relevant
 parse_git_branch() {
