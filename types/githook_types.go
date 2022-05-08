@@ -86,6 +86,8 @@ func (hooks *GitHooks) ConfigureCommitMsg() {
 		tmpl, err := template.New(".githooks").Parse(CommitMsg)
 		f, err := os.Create(commitMsgPath)
 		CheckError(err)
+		err = os.Chmod(commitMsgPath, 0755)
+		CheckError(err)
 		err = tmpl.Execute(f, &hooks)
 		CheckError(err)
 		err = f.Close()
