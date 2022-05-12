@@ -13,8 +13,8 @@ var cfgFile string
 
 var rootCmd = &cobra.Command{
 	Use:   "githooks",
-	Short: "githooks help developer on setting and commit git",
-	Long:  `A longer description about githooks tbd`,
+	Short: "githooks help developer on setting name's conventions of git-commit-msg ",
+	Long:  `githooks prevent developer enter unexpected commit messages, which don't contain predefined name's conventions.'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.CheckArgs(cmd, args)
 	},

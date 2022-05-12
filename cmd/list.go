@@ -10,7 +10,6 @@ var listCmd = &cobra.Command{
 	Short: "List all from githooks managed projects.",
 	Long:  `List all githooks managed projects`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//ListAllGitHooks()
 		ListAndSelectOne()
 	},
 }

@@ -22,6 +22,21 @@ You can install the script in multiple repositories, by passing the repository f
 $ install-jira-git-hook repo1 repo2 repo3
 ```
 
+## Install githooks cli-tool
+githooks cli-tool is a Linux command line application, which is developed with Go. 
+Once it is build, you can launch it directly.
+
+```shell
+$ curl -fsLO https://github.com/stefan-niemeyer/githooks/raw/main/githooks
+$ chmod +x githooks
+$ mv githooks /usr/local/bin
+```
+
+## Uninstall githooks cli-tool
+```shell
+$ rm /usr/local/bin
+```
+
 # Restriction to specific Jira projects
 
 In case the issue key must belong to certain Jira projects, you can specify the Jira project key list. Just use the option `-p` or `--projects`.

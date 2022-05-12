@@ -39,6 +39,9 @@ func DeleteSelectedProject(hook GitHooks) {
 
 func GetSelectedProject() GitHooks {
 	hookArr := ReadFromGitHookLog()
+	empty := GitHooks{Project: "Quit"}
+	hookArr = append(hookArr, empty)
+
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "➣ {{ .Project | cyan }}",
@@ -63,16 +66,21 @@ func GetSelectedProject() GitHooks {
 	i, _, err := prompt1.Run()
 	CheckError(err)
 
-	prompt2 := promptui.Prompt{
-		Label:     "Really want to delete this project",
-		IsConfirm: true,
-	}
-	confirmed, err := prompt2.Run()
-	if err != nil {
-		fmt.Println("Canceled")
-	}
-	if confirmed != "y" {
-		os.Exit(-1)
+	if hookArr[i].Project != "Quit" {
+		fmt.Println("print:", hookArr[i].Project)
+		prompt2 := promptui.Prompt{
+			Label:     "Really want to delete this project",
+			IsConfirm: true,
+		}
+		confirmed, err := prompt2.Run()
+		if err != nil {
+			fmt.Println("Canceled")
+		}
+		if confirmed != "y" {
+			os.Exit(-1)
+		}
+	} else {
+		os.Exit(0)
 	}
 	return hookArr[i]
 }
