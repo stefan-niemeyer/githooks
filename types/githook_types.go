@@ -13,25 +13,15 @@ import (
 )
 
 type GitHooks struct {
-	Project string
-	WorkDir string
-	Name    string
-	Email   string
-	Token   string
-}
-
-func upperCase(word string) string {
-	return strings.ToUpper(word)
-}
-
-func lowerCase(word string) string {
-	return strings.ToLower(word)
+	Project  string
+	JiraName string
+	WorkDir  string
 }
 
 // ConfigureHookFile create .gitconfig-<project> file under home dir
 func (hooks *GitHooks) ConfigureHookFile() {
 	tmpl, err := template.New(".gitconfig-project").Funcs(
-		template.FuncMap{"upperCase": upperCase}).Parse(GithookTmpl)
+		template.FuncMap{"upperCase": strings.ToUpper}).Parse(GithookTmpl)
 	CheckError(err)
 	homeDir, err := os.UserHomeDir()
 	CheckError(err)
@@ -56,23 +46,12 @@ func (hooks *GitHooks) ConfigureGitConfig() {
 	if !hasSlash {
 		hooks.WorkDir = hooks.WorkDir + "/"
 	}
-	tmpl, err := template.New(".gitconfig").Funcs(
-		template.FuncMap{"lowerCase": lowerCase}).Parse(GitConfigTmpl)
-	CheckError(err)
 	homeDir, _ := os.UserHomeDir()
 	configPath := homeDir + "/.gitconfig"
 	_, errorMsg := os.Stat(configPath)
-	if errorMsg != nil {
-		f, err := os.Create(configPath)
-		CheckError(err)
-		err = tmpl.Execute(f, &hooks)
-		CheckError(err)
-		err = f.Close()
-		CheckError(err)
-		fmt.Println("Created file .gitconfig")
-	} else {
+	if errorMsg == nil {
 		hooks.UpdateCurrentGitConfig()
-		fmt.Println("File .gitconfig already exists.")
+		fmt.Println("Updated .gitconfig.")
 	}
 }
 
@@ -93,8 +72,6 @@ func (hooks *GitHooks) ConfigureCommitMsg() {
 		err = f.Close()
 		CheckError(err)
 		fmt.Println("Created file ./githooks/commit-msg")
-	} else {
-		fmt.Println("File ./githooks/commit-msg already exists.")
 	}
 }
 
@@ -173,8 +150,10 @@ func writeArrAsLines(lines []string, path string) error {
 	}(file)
 	w := bufio.NewWriter(file)
 	for _, line := range lines {
-		_, err := fmt.Fprintln(w, line)
-		CheckError(err)
+		if line != "" {
+			_, err := fmt.Fprintln(w, line)
+			CheckError(err)
+		}
 	}
 	return w.Flush()
 }

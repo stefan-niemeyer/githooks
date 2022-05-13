@@ -67,7 +67,6 @@ func GetSelectedProject() GitHooks {
 	CheckError(err)
 
 	if hookArr[i].Project != "Quit" {
-		fmt.Println("print:", hookArr[i].Project)
 		prompt2 := promptui.Prompt{
 			Label:     "Really want to delete this project",
 			IsConfirm: true,

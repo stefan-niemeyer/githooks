@@ -12,29 +12,19 @@ import (
 	"text/template"
 )
 
-var configJiraTmpl = `
-[core]
-    hooksPath=~/.githooks
-[user]
-    jiraProjects={{ toUpper .Project }}
-`
-
-func GetDefaultGitHooks() GitHooks {
-	log := ReadFromGitHookLog()
-	if len(log) == 0 {
-		fmt.Println("❌  Please perform `githooks init` command first!")
+func AddGithooks() {
+	githooksHome := GetGithooksHome()
+	hookLogPath := githooksHome + "/" + GithooksLognName
+	_, err := os.ReadFile(hookLogPath)
+	if err != nil {
+		fmt.Printf("❌  File %s doesn't exist. Please perform githooks init first.", hookLogPath)
 		os.Exit(-1)
 	}
-	hook := ReadFromGitHookLog()[0]
-	return GitHooks{Name: hook.Name, Email: hook.Email, Token: hook.Token}
-}
 
-func AddGithooks() {
 	projName := GetPromptInput(Dialog{
 		ErrorMsg: "❌ Please provide a Jira project key to track.",
 		Label:    "🌟 Enter your Jira project's name:",
 	})
-	projName = strings.ToUpper(projName)
 
 	workDir := GetPromptInput(Dialog{
 		ErrorMsg: "❌ Please a path to workspace.",
@@ -44,9 +34,7 @@ func AddGithooks() {
 	if !hasSlash {
 		workDir = workDir + "/"
 	}
-	newHook := GetDefaultGitHooks()
-	newHook.Project = projName
-	newHook.WorkDir = workDir
+	newHook := GitHooks{Project: projName, JiraName: strings.ToUpper(projName), WorkDir: workDir}
 	PreviewGitConfigFile(newHook)
 	PreviewNewGitConfig(newHook)
 
@@ -57,12 +45,12 @@ func AddGithooks() {
 
 	confirmed, err := prompt.Run()
 	if err != nil {
-		fmt.Println("Canceled setting new githooks project.")
+		fmt.Println("❌ Canceled setting new githooks project.")
 	}
 	if confirmed == "y" {
+		newHook.PersistHooksAsLog()
 		CreateNewGitConfig(newHook)
 		UpdateGitConfigFile(newHook)
-		newHook.PersistHooksAsLog()
 	}
 }
 
@@ -74,7 +62,6 @@ func PreviewGitConfigFile(newHook GitHooks) {
 	CheckError(err)
 	configContent := string(bContent)
 	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
-		"toUpper": strings.ToUpper,
 		"toLower": strings.ToLower,
 	}).Parse(viewHeader + configContent + GitConfigPatch)
 	CheckError(err)
@@ -90,7 +77,6 @@ func UpdateGitConfigFile(newHook GitHooks) {
 	CheckError(err)
 	configContent := string(bContent)
 	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
-		"toUpper": strings.ToUpper,
 		"toLower": strings.ToLower,
 	}).Parse(configContent + GitConfigPatch)
 	CheckError(err)
@@ -106,10 +92,7 @@ func UpdateGitConfigFile(newHook GitHooks) {
 func CreateNewGitConfig(newHook GitHooks) {
 	homeDir, err := os.UserHomeDir()
 	gitConfigPath := homeDir + "/.gitconfig-" + strings.ToLower(newHook.Project)
-	tmpl, err := template.New("simple-jira-config").Funcs(template.FuncMap{
-		"toUpper": strings.ToUpper,
-		"toLower": strings.ToLower,
-	}).Parse(configJiraTmpl)
+	tmpl, err := template.New("jira-config").Parse(ConfigJiraTmpl)
 	CheckError(err)
 	f, err := os.Create(gitConfigPath)
 	CheckError(err)
@@ -122,10 +105,7 @@ func CreateNewGitConfig(newHook GitHooks) {
 
 func PreviewNewGitConfig(newHook GitHooks) {
 	viewHeader := "========================== .gitconfig-" + strings.ToLower(newHook.Project) + " ==========================\n"
-	tmpl, err := template.New("simple-jira-config").Funcs(template.FuncMap{
-		"toUpper": strings.ToUpper,
-		"toLower": strings.ToLower,
-	}).Parse(viewHeader + configJiraTmpl)
+	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + ConfigJiraTmpl)
 	CheckError(err)
 	err = tmpl.Execute(os.Stdout, newHook)
 	CheckError(err)
