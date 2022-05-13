@@ -11,9 +11,11 @@ import (
 )
 
 var detailTmpl = `
+{{ if ne .Project "Quit" }}
 ------------------ Project's Configuration --------------------
 Jira Project Name: {{ .Project | faint }}
 Project Workspace: {{ .WorkDir | faint }}
+{{ end }}
 `
 
 func ReadFromGitHookLog() []GitHooks {
@@ -37,6 +39,8 @@ func ReadFromGitHookLog() []GitHooks {
 
 func ListAndSelectOne() GitHooks {
 	hookArr := ReadFromGitHookLog()
+	empty := GitHooks{Project: "Quit"}
+	hookArr = append(hookArr, empty)
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}",

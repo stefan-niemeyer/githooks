@@ -12,7 +12,9 @@ var deleteCmd = &cobra.Command{
 	Long:  `A longer description `,
 	Run: func(cmd *cobra.Command, args []string) {
 		selected := GetSelectedProject()
-		DeleteSelectedProject(selected)
+		if selected.Project != "Quit" {
+			DeleteSelectedProject(selected)
+		}
 	},
 }
 
