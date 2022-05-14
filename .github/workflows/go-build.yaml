@@ -26,5 +26,5 @@ jobs:
       - name: Bin
         uses: actions/upload-artifact@v2
         with:
-          name: githooks
-          path: ./bin/githooks*
+          name: githooks_${{ matrix.os }}_${{ matrix.arch }}
+          path: ./bin/githooks_${{ matrix.os }}_${{ matrix.arch }}
