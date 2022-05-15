@@ -38,7 +38,6 @@ func (hooks *GitHooks) ConfigureHookFile() {
 	} else {
 		fmt.Printf("File %s already exists.", filePath)
 	}
-
 }
 
 func (hooks *GitHooks) ConfigureGitConfig() {
@@ -135,6 +134,70 @@ func (hooks *GitHooks) RemoveCurrentHookFromLog() {
 	newHooksArr := remove(hooksArr, removeTag)
 	err = writeArrAsLines(newHooksArr, hookLogPath)
 	CheckError(err)
+}
+
+func (hooks *GitHooks) PreviewGitConfigFile() {
+	viewHeader := "========================== .gitconfig ==========================\n"
+	homeDir, err := os.UserHomeDir()
+	CheckError(err)
+	gitConfigPath := homeDir + "/.gitconfig"
+	bContent, err := ReadFile(gitConfigPath)
+	if err != nil {
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.", gitConfigPath)
+		os.Exit(-1)
+	}
+	configContent := string(bContent)
+	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
+		"toLower": strings.ToLower,
+	}).Parse(viewHeader + configContent + GitConfigPatch)
+	CheckError(err)
+	err = tmpl.Execute(os.Stdout, hooks)
+	CheckError(err)
+}
+
+func (hooks *GitHooks) PreviewNewGitConfig() {
+	viewHeader := "========================== .gitconfig-" + strings.ToLower(hooks.Project) + " ==========================\n"
+	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + ConfigJiraTmpl)
+	CheckError(err)
+	err = tmpl.Execute(os.Stdout, hooks)
+	CheckError(err)
+}
+
+func (hooks *GitHooks) UpdateGitConfigFile() {
+	homeDir, err := os.UserHomeDir()
+	gitConfigPath := homeDir + "/.gitconfig"
+	CheckError(err)
+	bContent, err := ReadFile(gitConfigPath)
+	if err != nil {
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.", gitConfigPath)
+		os.Exit(-1)
+	}
+	configContent := string(bContent)
+	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
+		"toLower": strings.ToLower,
+	}).Parse(configContent + GitConfigPatch)
+	CheckError(err)
+	f, err := os.Create(gitConfigPath)
+	CheckError(err)
+	err = tmpl.Execute(f, hooks)
+	CheckError(err)
+	err = f.Close()
+	CheckError(err)
+	fmt.Println("✅  Updated file:", gitConfigPath)
+}
+
+func (hooks *GitHooks) CreateNewGitConfig() {
+	homeDir, err := os.UserHomeDir()
+	gitConfigPath := homeDir + "/.gitconfig-" + strings.ToLower(hooks.Project)
+	tmpl, err := template.New("jira-config").Parse(ConfigJiraTmpl)
+	CheckError(err)
+	f, err := os.Create(gitConfigPath)
+	CheckError(err)
+	err = tmpl.Execute(f, hooks)
+	CheckError(err)
+	err = f.Close()
+	CheckError(err)
+	fmt.Println("✅  Create new file:", gitConfigPath)
 }
 
 func remove(slice []string, s int) []string {

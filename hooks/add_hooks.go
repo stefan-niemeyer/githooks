@@ -6,10 +6,8 @@ import (
 	. "github.com/xiabai84/githooks/config"
 	. "github.com/xiabai84/githooks/types"
 	. "github.com/xiabai84/githooks/utils"
-	. "io/ioutil"
 	"os"
 	"strings"
-	"text/template"
 )
 
 func AddGithooks() {
@@ -35,8 +33,8 @@ func AddGithooks() {
 		workDir = workDir + "/"
 	}
 	newHook := GitHooks{Project: projName, JiraName: strings.ToUpper(projName), WorkDir: workDir}
-	PreviewGitConfigFile(newHook)
-	PreviewNewGitConfig(newHook)
+	newHook.PreviewGitConfigFile()
+	newHook.PreviewNewGitConfig()
 
 	prompt := promptui.Prompt{
 		Label:     "Input was correct",
@@ -49,64 +47,7 @@ func AddGithooks() {
 	}
 	if confirmed == "y" {
 		newHook.PersistHooksAsLog()
-		CreateNewGitConfig(newHook)
-		UpdateGitConfigFile(newHook)
+		newHook.CreateNewGitConfig()
+		newHook.UpdateGitConfigFile()
 	}
-}
-
-func PreviewGitConfigFile(newHook GitHooks) {
-	viewHeader := "========================== .gitconfig ==========================\n"
-	homeDir, err := os.UserHomeDir()
-	CheckError(err)
-	bContent, err := ReadFile(homeDir + "/.gitconfig")
-	CheckError(err)
-	configContent := string(bContent)
-	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
-		"toLower": strings.ToLower,
-	}).Parse(viewHeader + configContent + GitConfigPatch)
-	CheckError(err)
-	err = tmpl.Execute(os.Stdout, newHook)
-	CheckError(err)
-}
-
-func UpdateGitConfigFile(newHook GitHooks) {
-	homeDir, err := os.UserHomeDir()
-	gitConfigPath := homeDir + "/.gitconfig"
-	CheckError(err)
-	bContent, err := ReadFile(gitConfigPath)
-	CheckError(err)
-	configContent := string(bContent)
-	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
-		"toLower": strings.ToLower,
-	}).Parse(configContent + GitConfigPatch)
-	CheckError(err)
-	f, err := os.Create(gitConfigPath)
-	CheckError(err)
-	err = tmpl.Execute(f, newHook)
-	CheckError(err)
-	err = f.Close()
-	CheckError(err)
-	fmt.Println("✅  Updated file:", gitConfigPath)
-}
-
-func CreateNewGitConfig(newHook GitHooks) {
-	homeDir, err := os.UserHomeDir()
-	gitConfigPath := homeDir + "/.gitconfig-" + strings.ToLower(newHook.Project)
-	tmpl, err := template.New("jira-config").Parse(ConfigJiraTmpl)
-	CheckError(err)
-	f, err := os.Create(gitConfigPath)
-	CheckError(err)
-	err = tmpl.Execute(f, newHook)
-	CheckError(err)
-	err = f.Close()
-	CheckError(err)
-	fmt.Println("✅  Create new file:", gitConfigPath)
-}
-
-func PreviewNewGitConfig(newHook GitHooks) {
-	viewHeader := "========================== .gitconfig-" + strings.ToLower(newHook.Project) + " ==========================\n"
-	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + ConfigJiraTmpl)
-	CheckError(err)
-	err = tmpl.Execute(os.Stdout, newHook)
-	CheckError(err)
 }
