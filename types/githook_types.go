@@ -2,6 +2,7 @@ package types
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	. "github.com/xiabai84/githooks/config"
@@ -72,6 +73,27 @@ func (hooks *GitHooks) ConfigureCommitMsg() {
 		CheckError(err)
 		fmt.Println("Created file ./githooks/commit-msg")
 	}
+}
+
+func (hooks *GitHooks) OverwriteGitconfig() {
+	homeDir, err := os.UserHomeDir()
+	CheckError(err)
+	gitConfigPath := homeDir + "/.gitconfig"
+	bytesRead, _ := ReadFile(gitConfigPath)
+	gitConfigContent := string(bytesRead)
+	var partToReplace bytes.Buffer
+	tmpl, err := template.New("origi").Funcs(template.FuncMap{
+		"toLower": strings.ToLower,
+	}).Parse(GitConfigPatch)
+	CheckError(err)
+	err = tmpl.Execute(&partToReplace, hooks)
+	newGitConfigContent := strings.Replace(gitConfigContent, partToReplace.String(), "", -1)
+	f, err := os.OpenFile(gitConfigPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	CheckError(err)
+	_, err = f.Write([]byte(newGitConfigContent))
+	CheckError(err)
+	err = f.Close()
+	CheckError(err)
 }
 
 func (hooks *GitHooks) DeleteHookGitConfig() {

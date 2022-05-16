@@ -1,40 +1,19 @@
 package hooks
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/manifoldco/promptui"
-	. "github.com/xiabai84/githooks/config"
 	. "github.com/xiabai84/githooks/types"
 	. "github.com/xiabai84/githooks/utils"
-	"io/ioutil"
 	"os"
 	"strings"
-	"text/template"
 )
 
 func DeleteSelectedProject(hook GitHooks) {
-	homeDir, err := os.UserHomeDir()
-	CheckError(err)
-	gitConfigPath := homeDir + "/.gitconfig"
-	bytesRead, _ := ioutil.ReadFile(gitConfigPath)
-	gitConfigContent := string(bytesRead)
-	var partToReplace bytes.Buffer
-	tmpl, err := template.New("origi").Funcs(template.FuncMap{
-		"toLower": strings.ToLower,
-	}).Parse(GitConfigPatch)
-	CheckError(err)
-	err = tmpl.Execute(&partToReplace, hook)
-	newGitConfigContent := strings.Replace(gitConfigContent, partToReplace.String(), "", -1)
-	f, err := os.OpenFile(gitConfigPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-	CheckError(err)
-	_, err = f.Write([]byte(newGitConfigContent))
-	CheckError(err)
-	err = f.Close()
-	CheckError(err)
-	fmt.Println("✅  Removed project", hook.Project)
+	hook.OverwriteGitconfig()
 	hook.RemoveCurrentHookFromLog()
 	hook.DeleteHookGitConfig()
+	fmt.Println("✅  Removed project", hook.Project)
 }
 
 func GetSelectedProject() GitHooks {
