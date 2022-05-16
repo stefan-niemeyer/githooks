@@ -9,14 +9,7 @@ import (
 	"strings"
 )
 
-func DeleteSelectedProject(hook GitHooks) {
-	hook.OverwriteGitconfig()
-	hook.RemoveCurrentHookFromLog()
-	hook.DeleteHookGitConfig()
-	fmt.Println("✅  Removed project", hook.Project)
-}
-
-func GetSelectedProject() GitHooks {
+func DeleteSelectedProject() {
 	hookArr := ReadFromGitHookLog()
 	empty := GitHooks{Project: "Quit"}
 	hookArr = append(hookArr, empty)
@@ -57,8 +50,11 @@ func GetSelectedProject() GitHooks {
 		if confirmed != "y" {
 			os.Exit(-1)
 		}
+		hookArr[i].OverwriteGitconfig()
+		hookArr[i].RemoveCurrentHookFromLog()
+		hookArr[i].DeleteHookGitConfig()
+		fmt.Println("✅  Removed project", hookArr[i].Project)
 	} else {
 		os.Exit(0)
 	}
-	return hookArr[i]
 }

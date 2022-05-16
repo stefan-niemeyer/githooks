@@ -11,10 +11,7 @@ var deleteCmd = &cobra.Command{
 	Short: "Delete a githooks project and its settings",
 	Long:  `A longer description `,
 	Run: func(cmd *cobra.Command, args []string) {
-		selected := GetSelectedProject()
-		if selected.Project != "Quit" {
-			DeleteSelectedProject(selected)
-		}
+		DeleteSelectedProject()
 	},
 }
 
