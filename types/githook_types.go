@@ -13,25 +13,15 @@ import (
 )
 
 type GitHooks struct {
-	Project string
-	WorkDir string
-	Name    string
-	Email   string
-	Token   string
-}
-
-func upperCase(word string) string {
-	return strings.ToUpper(word)
-}
-
-func lowerCase(word string) string {
-	return strings.ToLower(word)
+	Project  string
+	JiraName string
+	WorkDir  string
 }
 
 // ConfigureHookFile create .gitconfig-<project> file under home dir
 func (hooks *GitHooks) ConfigureHookFile() {
 	tmpl, err := template.New(".gitconfig-project").Funcs(
-		template.FuncMap{"upperCase": upperCase}).Parse(GithookTmpl)
+		template.FuncMap{"upperCase": strings.ToUpper}).Parse(GithookTmpl)
 	CheckError(err)
 	homeDir, err := os.UserHomeDir()
 	CheckError(err)
@@ -48,7 +38,6 @@ func (hooks *GitHooks) ConfigureHookFile() {
 	} else {
 		fmt.Printf("File %s already exists.", filePath)
 	}
-
 }
 
 func (hooks *GitHooks) ConfigureGitConfig() {
@@ -56,23 +45,12 @@ func (hooks *GitHooks) ConfigureGitConfig() {
 	if !hasSlash {
 		hooks.WorkDir = hooks.WorkDir + "/"
 	}
-	tmpl, err := template.New(".gitconfig").Funcs(
-		template.FuncMap{"lowerCase": lowerCase}).Parse(GitConfigTmpl)
-	CheckError(err)
 	homeDir, _ := os.UserHomeDir()
 	configPath := homeDir + "/.gitconfig"
 	_, errorMsg := os.Stat(configPath)
-	if errorMsg != nil {
-		f, err := os.Create(configPath)
-		CheckError(err)
-		err = tmpl.Execute(f, &hooks)
-		CheckError(err)
-		err = f.Close()
-		CheckError(err)
-		fmt.Println("Created file .gitconfig")
-	} else {
+	if errorMsg == nil {
 		hooks.UpdateCurrentGitConfig()
-		fmt.Println("File .gitconfig already exists.")
+		fmt.Println("Updated .gitconfig.")
 	}
 }
 
@@ -93,8 +71,6 @@ func (hooks *GitHooks) ConfigureCommitMsg() {
 		err = f.Close()
 		CheckError(err)
 		fmt.Println("Created file ./githooks/commit-msg")
-	} else {
-		fmt.Println("File ./githooks/commit-msg already exists.")
 	}
 }
 
@@ -160,6 +136,70 @@ func (hooks *GitHooks) RemoveCurrentHookFromLog() {
 	CheckError(err)
 }
 
+func (hooks *GitHooks) PreviewGitConfigFile() {
+	viewHeader := "========================== .gitconfig ==========================\n"
+	homeDir, err := os.UserHomeDir()
+	CheckError(err)
+	gitConfigPath := homeDir + "/.gitconfig"
+	bContent, err := ReadFile(gitConfigPath)
+	if err != nil {
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.", gitConfigPath)
+		os.Exit(-1)
+	}
+	configContent := string(bContent)
+	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
+		"toLower": strings.ToLower,
+	}).Parse(viewHeader + configContent + GitConfigPatch)
+	CheckError(err)
+	err = tmpl.Execute(os.Stdout, hooks)
+	CheckError(err)
+}
+
+func (hooks *GitHooks) PreviewNewGitConfig() {
+	viewHeader := "========================== .gitconfig-" + strings.ToLower(hooks.Project) + " ==========================\n"
+	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + ConfigJiraTmpl)
+	CheckError(err)
+	err = tmpl.Execute(os.Stdout, hooks)
+	CheckError(err)
+}
+
+func (hooks *GitHooks) UpdateGitConfigFile() {
+	homeDir, err := os.UserHomeDir()
+	gitConfigPath := homeDir + "/.gitconfig"
+	CheckError(err)
+	bContent, err := ReadFile(gitConfigPath)
+	if err != nil {
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.", gitConfigPath)
+		os.Exit(-1)
+	}
+	configContent := string(bContent)
+	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
+		"toLower": strings.ToLower,
+	}).Parse(configContent + GitConfigPatch)
+	CheckError(err)
+	f, err := os.Create(gitConfigPath)
+	CheckError(err)
+	err = tmpl.Execute(f, hooks)
+	CheckError(err)
+	err = f.Close()
+	CheckError(err)
+	fmt.Println("✅  Updated file:", gitConfigPath)
+}
+
+func (hooks *GitHooks) CreateNewGitConfig() {
+	homeDir, err := os.UserHomeDir()
+	gitConfigPath := homeDir + "/.gitconfig-" + strings.ToLower(hooks.Project)
+	tmpl, err := template.New("jira-config").Parse(ConfigJiraTmpl)
+	CheckError(err)
+	f, err := os.Create(gitConfigPath)
+	CheckError(err)
+	err = tmpl.Execute(f, hooks)
+	CheckError(err)
+	err = f.Close()
+	CheckError(err)
+	fmt.Println("✅  Create new file:", gitConfigPath)
+}
+
 func remove(slice []string, s int) []string {
 	return append(slice[:s], slice[s+1:]...)
 }
@@ -173,8 +213,10 @@ func writeArrAsLines(lines []string, path string) error {
 	}(file)
 	w := bufio.NewWriter(file)
 	for _, line := range lines {
-		_, err := fmt.Fprintln(w, line)
-		CheckError(err)
+		if line != "" {
+			_, err := fmt.Fprintln(w, line)
+			CheckError(err)
+		}
 	}
 	return w.Flush()
 }

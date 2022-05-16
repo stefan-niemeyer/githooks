@@ -56,6 +56,7 @@ func ListAndSelectOne() GitHooks {
 		input = strings.Replace(strings.ToLower(input), " ", "", -1)
 		return strings.Contains(projName, input)
 	}
+
 	prompt := promptui.Select{
 		Label:     "Active Githooks config file(s):",
 		Items:     hookArr,

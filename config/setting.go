@@ -9,17 +9,13 @@ var GithookTmpl = `
     jiraProjects={{ upperCase .Project }}
 `
 
-var GitConfigTmpl = `
-[user]
-	token = {{.Token}}
-	name = {{.Name}}
-	email = {{.Email}}
-
-[includeIf "gitdir:{{.WorkDir}}"]
-    path = .gitconfig-{{ lowerCase .Project }}
-
-`
-
 var GitConfigPatch = `[includeIf "gitdir:{{ .WorkDir }}"]
     path = .gitconfig-{{ toLower .Project }}
+`
+
+var ConfigJiraTmpl = `
+[core]
+    hooksPath=~/.githooks
+[user]
+    jiraProjects={{ .JiraName }}
 `
