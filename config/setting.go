@@ -2,20 +2,21 @@ package config
 
 const GithooksLognName = "githooks.log"
 
-var GithookTmpl = `
-[core]
-    hooksPath=~/.githooks
-[user]
-    jiraProjects={{ upperCase .Project }}
-`
-
 var GitConfigPatch = `[includeIf "gitdir:{{ .WorkDir }}"]
     path = .gitconfig-{{ toLower .Project }}
 `
 
-var ConfigJiraTmpl = `
+var HooksConfigTmpl = `
 [core]
     hooksPath=~/.githooks
 [user]
     jiraProjects={{ .JiraName }}
+`
+
+var DetailTmpl = `
+{{ if ne .Project "Quit" }}
+------------------ Project's Configuration --------------------
+Jira Project Name: {{ .Project | faint }}
+Project Workspace: {{ .WorkDir | faint }}
+{{ end }}
 `

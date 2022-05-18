@@ -35,24 +35,3 @@ func GetPromptInput(pc Dialog) string {
 	fmt.Printf("✅  %s\n", result)
 	return result
 }
-
-func GetPromptSelect(pc Dialog, items []string) string {
-	index := -1
-	var result string
-	var err error
-
-	for index < 0 {
-
-		prompt := promptui.SelectWithAdd{
-			Label: pc.Label,
-			Items: items,
-		}
-		index, result, err = prompt.Run()
-		if index == -1 {
-			items = append(items, result)
-		}
-	}
-	CheckError(err)
-	fmt.Printf("✅  Selected: %s\n", result)
-	return result
-}
