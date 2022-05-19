@@ -30,7 +30,7 @@ func previewGitConfigFile(hooks *GitHooks) {
 	gitConfigPath := homeDir + "/.gitconfig"
 	bContent, err := ReadFile(gitConfigPath)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.", gitConfigPath)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", gitConfigPath)
 		os.Exit(-1)
 	}
 	configContent := string(bContent)
@@ -81,7 +81,7 @@ func updateGitConfigFile(hooks *GitHooks) {
 	CheckError(err)
 	bContent, err := ReadFile(gitConfigPath)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.", gitConfigPath)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", gitConfigPath)
 		os.Exit(-1)
 	}
 	configContent := string(bContent)
