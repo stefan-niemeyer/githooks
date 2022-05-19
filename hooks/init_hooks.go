@@ -26,9 +26,10 @@ func InitHooks() GitHooks {
 	homeDir, _ := os.UserHomeDir()
 	hookDir := homeDir + "/.githooks"
 	commitMsgPath := hookDir + "/commit-msg"
+	githooksLogPath := hookDir + "/" + GithooksLognName
 	CreateDirIfNotExists(hookDir)
-	_, errorMsg := os.Stat(commitMsgPath)
 
+	_, errorMsg := os.Stat(commitMsgPath)
 	if errorMsg != nil {
 		tmpl, err := template.New(".githooks").Parse(CommitMsg)
 		f, err := os.Create(commitMsgPath)
@@ -40,6 +41,13 @@ func InitHooks() GitHooks {
 		err = f.Close()
 		CheckError(err)
 		fmt.Println("✅  Created file ./githooks/commit-msg")
+	}
+
+	_, errorLog := os.Stat(githooksLogPath)
+	if errorLog != nil {
+		_, err := os.Create(githooksLogPath)
+		CheckError(err)
+		fmt.Println("✅  Created file ./githooks/" + GithooksLognName)
 	}
 
 	return hook
