@@ -22,9 +22,7 @@ func DeleteSelectedProject(hooks *GitHooks) {
 }
 
 func removeCurrentHookFromLog(hooks *GitHooks) {
-	gitHome := GetGithooksHome()
-	hookLogPath := gitHome + "/" + GithooksLognName
-	content, err := os.ReadFile(hookLogPath)
+	content, err := os.ReadFile(GithooksLogPath)
 	CheckError(err)
 	hooksArr := strings.Split(string(content), "\n")
 	var removeTag int
@@ -40,15 +38,12 @@ func removeCurrentHookFromLog(hooks *GitHooks) {
 		}
 	}
 	newHooksArr := remove(hooksArr, removeTag)
-	err = writeArrAsLines(newHooksArr, hookLogPath)
+	err = writeArrAsLines(newHooksArr, GithooksLogPath)
 	CheckError(err)
 }
 
 func overwriteGitconfig(hooks *GitHooks) {
-	homeDir, err := os.UserHomeDir()
-	CheckError(err)
-	gitConfigPath := homeDir + "/.gitconfig"
-	bytesRead, _ := ReadFile(gitConfigPath)
+	bytesRead, _ := ReadFile(GitConfigPath)
 	gitConfigContent := string(bytesRead)
 	var partToReplace bytes.Buffer
 	tmpl, err := template.New("origi").Funcs(template.FuncMap{
@@ -57,7 +52,7 @@ func overwriteGitconfig(hooks *GitHooks) {
 	CheckError(err)
 	err = tmpl.Execute(&partToReplace, hooks)
 	newGitConfigContent := strings.Replace(gitConfigContent, partToReplace.String(), "", -1)
-	f, err := os.OpenFile(gitConfigPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	f, err := os.OpenFile(GitConfigPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	CheckError(err)
 	_, err = f.Write([]byte(newGitConfigContent))
 	CheckError(err)
@@ -89,8 +84,7 @@ func writeArrAsLines(lines []string, path string) error {
 }
 
 func deleteHookGitConfig(hooks *GitHooks) {
-	homeDir, _ := os.UserHomeDir()
-	configPath := homeDir + "/.gitconfig-" + strings.ToLower(hooks.Project)
+	configPath := GitConfigPath + "-" + strings.ToLower(hooks.Project)
 	err := os.Remove(configPath)
 	CheckError(err)
 }

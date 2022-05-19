@@ -25,12 +25,9 @@ func PreviewConfig(newHook *GitHooks) {
 
 func previewGitConfigFile(hooks *GitHooks) {
 	viewHeader := "========================== .gitconfig ==========================\n"
-	homeDir, err := os.UserHomeDir()
-	CheckError(err)
-	gitConfigPath := homeDir + "/.gitconfig"
-	bContent, err := ReadFile(gitConfigPath)
+	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", gitConfigPath)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigPath)
 		os.Exit(-1)
 	}
 	configContent := string(bContent)
@@ -51,19 +48,16 @@ func previewNewGitConfig(hooks *GitHooks) {
 }
 
 func persistHooksAsLog(hooks *GitHooks) {
-	gitHome := GetGithooksHome()
-	hookLogPath := gitHome + "/" + GithooksLognName
-	content, err := os.ReadFile(hookLogPath)
+	content, err := os.ReadFile(GithooksLogPath)
 	CheckError(err)
 	hookJson, _ := json.Marshal(hooks)
 	newContent := string(content) + string(hookJson) + "\n"
-	err = os.WriteFile(hookLogPath, []byte(newContent), 0755)
+	err = os.WriteFile(GithooksLogPath, []byte(newContent), 0755)
 	CheckError(err)
 }
 
 func createNewGitConfig(hooks *GitHooks) {
-	homeDir, err := os.UserHomeDir()
-	gitConfigPath := homeDir + "/.gitconfig-" + strings.ToLower(hooks.Project)
+	gitConfigPath := GitConfigPath + "-" + strings.ToLower(hooks.Project)
 	tmpl, err := template.New("jira-config").Parse(HooksConfigTmpl)
 	CheckError(err)
 	f, err := os.Create(gitConfigPath)
@@ -76,12 +70,9 @@ func createNewGitConfig(hooks *GitHooks) {
 }
 
 func updateGitConfigFile(hooks *GitHooks) {
-	homeDir, err := os.UserHomeDir()
-	gitConfigPath := homeDir + "/.gitconfig"
-	CheckError(err)
-	bContent, err := ReadFile(gitConfigPath)
+	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", gitConfigPath)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigPath)
 		os.Exit(-1)
 	}
 	configContent := string(bContent)
@@ -89,11 +80,11 @@ func updateGitConfigFile(hooks *GitHooks) {
 		"toLower": strings.ToLower,
 	}).Parse(configContent + GitConfigPatch)
 	CheckError(err)
-	f, err := os.Create(gitConfigPath)
+	f, err := os.Create(GitConfigPath)
 	CheckError(err)
 	err = tmpl.Execute(f, hooks)
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)
-	fmt.Println("✅  Updated file:", gitConfigPath)
+	fmt.Println("✅  Updated file:", GitConfigPath)
 }

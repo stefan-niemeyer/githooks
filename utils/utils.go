@@ -45,9 +45,3 @@ func CreateDirIfNotExists(dirName string) bool {
 	}
 	return true
 }
-
-func GetGithooksHome() string {
-	home, err := os.UserHomeDir()
-	CheckError(err)
-	return home + "/.githooks"
-}

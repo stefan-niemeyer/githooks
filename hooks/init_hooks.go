@@ -1,7 +1,6 @@
 package hooks
 
 import (
-	"errors"
 	"fmt"
 	. "github.com/xiabai84/githooks/config"
 	. "github.com/xiabai84/githooks/types"
@@ -12,42 +11,27 @@ import (
 
 func InitHooks() GitHooks {
 	hook := GitHooks{}
-	gitHome := GetGithooksHome()
-	doesExist := CreateDirIfNotExists(gitHome)
+	CreateDirIfNotExists(HookDir)
 
-	if !doesExist {
-		githooksLogPath := gitHome + "/" + GithooksLognName
-		if _, err := os.Stat(githooksLogPath); errors.Is(err, os.ErrNotExist) {
-			_, err := os.Create(githooksLogPath)
-			CheckError(err)
-		}
-	}
-
-	homeDir, _ := os.UserHomeDir()
-	hookDir := homeDir + "/.githooks"
-	commitMsgPath := hookDir + "/commit-msg"
-	githooksLogPath := hookDir + "/" + GithooksLognName
-	CreateDirIfNotExists(hookDir)
-
-	_, errorMsg := os.Stat(commitMsgPath)
+	_, errorMsg := os.Stat(CommitMsgPath)
 	if errorMsg != nil {
 		tmpl, err := template.New(".githooks").Parse(CommitMsg)
-		f, err := os.Create(commitMsgPath)
+		f, err := os.Create(CommitMsgPath)
 		CheckError(err)
-		err = os.Chmod(commitMsgPath, 0755)
+		err = os.Chmod(CommitMsgPath, 0755)
 		CheckError(err)
 		err = tmpl.Execute(f, &hook)
 		CheckError(err)
 		err = f.Close()
 		CheckError(err)
-		fmt.Println("✅  Created file ./githooks/commit-msg")
+		fmt.Println("✅  Created file", CommitMsgPath)
 	}
 
-	_, errorLog := os.Stat(githooksLogPath)
+	_, errorLog := os.Stat(GithooksLogPath)
 	if errorLog != nil {
-		_, err := os.Create(githooksLogPath)
+		_, err := os.Create(GithooksLogPath)
 		CheckError(err)
-		fmt.Println("✅  Created file ./githooks/" + GithooksLognName)
+		fmt.Println("✅  Created file" + GithooksLogPath)
 	}
 
 	return hook

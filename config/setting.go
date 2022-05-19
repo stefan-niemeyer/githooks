@@ -1,6 +1,18 @@
 package config
 
-const GithooksLognName = "githooks.log"
+import (
+	"os"
+)
+
+var HomeDir, _ = os.UserHomeDir()
+var HookDir = HomeDir + "/.githooks"
+
+const GithooksLogName = "githooks.log"
+const CommitMsgName = "commit-msg"
+
+var GithooksLogPath = HookDir + "/" + GithooksLogName
+var CommitMsgPath = HomeDir + "/" + CommitMsgName
+var GitConfigPath = HomeDir + "/.gitconfig"
 
 var GitConfigPatch = `[includeIf "gitdir:{{ .WorkDir }}"]
     path = .gitconfig-{{ toLower .Project }}

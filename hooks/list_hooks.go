@@ -11,10 +11,8 @@ import (
 
 func ReadFromGitHookLog() []GitHooks {
 	var hookArr []GitHooks
-	hookHome := GetGithooksHome()
-	hookLog := hookHome + "/" + GithooksLognName
 
-	bytesRead, _ := ioutil.ReadFile(hookLog)
+	bytesRead, _ := ioutil.ReadFile(GithooksLogPath)
 	fileContent := string(bytesRead)
 	lines := strings.Split(fileContent, "\n")
 

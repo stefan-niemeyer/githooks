@@ -6,7 +6,6 @@ import (
 	. "github.com/xiabai84/githooks/config"
 	. "github.com/xiabai84/githooks/hooks"
 	. "github.com/xiabai84/githooks/types"
-	. "github.com/xiabai84/githooks/utils"
 	"os"
 	"strings"
 
@@ -19,12 +18,10 @@ var addCmd = &cobra.Command{
 	Long:  `A longer description`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		githooksHome := GetGithooksHome()
-		hookLogPath := githooksHome + "/" + GithooksLognName
-		_, err := os.ReadFile(hookLogPath)
+		_, err := os.ReadFile(GithooksLogPath)
 
 		if err != nil {
-			fmt.Printf("❌  File %s doesn't exist. Please perform githooks init first.\n", hookLogPath)
+			fmt.Printf("❌  File %s doesn't exist. Please perform githooks init first.\n", GithooksLogPath)
 			os.Exit(-1)
 		}
 
