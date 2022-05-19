@@ -24,7 +24,7 @@ var addCmd = &cobra.Command{
 		_, err := os.ReadFile(hookLogPath)
 
 		if err != nil {
-			fmt.Printf("❌  File %s doesn't exist. Please perform githooks init first.", hookLogPath)
+			fmt.Printf("❌  File %s doesn't exist. Please perform githooks init first.\n", hookLogPath)
 			os.Exit(-1)
 		}
 
