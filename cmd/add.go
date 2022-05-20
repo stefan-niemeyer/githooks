@@ -3,10 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/manifoldco/promptui"
-	. "github.com/xiabai84/githooks/config"
 	. "github.com/xiabai84/githooks/hooks"
 	. "github.com/xiabai84/githooks/types"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -18,12 +16,7 @@ var addCmd = &cobra.Command{
 	Long:  `A longer description`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		_, err := os.ReadFile(GithooksLogPath)
-
-		if err != nil {
-			fmt.Printf("❌  File %s doesn't exist. Please perform githooks init first.\n", GithooksLogPath)
-			os.Exit(-1)
-		}
+		CheckConfigFiles()
 
 		projName := GetPromptInput(Dialog{
 			ErrorMsg: "❌ Please provide a Jira project key to track.",

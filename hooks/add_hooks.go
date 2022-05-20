@@ -23,6 +23,31 @@ func PreviewConfig(newHook *GitHooks) {
 	previewNewGitConfig(newHook)
 }
 
+func CheckConfigFiles() {
+	_, err1 := os.Stat(GitConfigPath)
+	_, err2 := os.Stat(HookDir)
+	_, err3 := os.Stat(CommitMsgPath)
+	_, err4 := os.Stat(GithooksLogPath)
+
+	switch {
+	case err1 != nil:
+		fmt.Println("❌ Githooks relies on git, please configure your local git first.")
+		os.Exit(-1)
+
+	case err2 != nil:
+		fmt.Printf("❌ File %s doesn't exist, please perform githooks init first.", HookDir)
+		os.Exit(-1)
+
+	case err3 != nil:
+		fmt.Printf("❌ File %s doesn't exist, please perform githooks init first.", CommitMsgPath)
+		os.Exit(-1)
+
+	case err4 != nil:
+		fmt.Printf("❌ File %s doesn't exist, please perform githooks init first.", GithooksLogPath)
+		os.Exit(-1)
+	}
+}
+
 func previewGitConfigFile(hooks *GitHooks) {
 	viewHeader := "========================== .gitconfig ==========================\n"
 	bContent, err := ReadFile(GitConfigPath)

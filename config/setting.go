@@ -11,7 +11,7 @@ const GithooksLogName = "githooks.log"
 const CommitMsgName = "commit-msg"
 
 var GithooksLogPath = HookDir + "/" + GithooksLogName
-var CommitMsgPath = HomeDir + "/" + CommitMsgName
+var CommitMsgPath = HookDir + "/" + CommitMsgName
 var GitConfigPath = HomeDir + "/.gitconfig"
 
 var GitConfigPatch = `[includeIf "gitdir:{{ .WorkDir }}"]
