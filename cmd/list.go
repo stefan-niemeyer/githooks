@@ -3,10 +3,10 @@ package cmd
 import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	. "github.com/xiabai84/githooks/config"
-	. "github.com/xiabai84/githooks/hooks"
-	. "github.com/xiabai84/githooks/types"
-	. "github.com/xiabai84/githooks/utils"
+	. "github.com/stefan-niemeyer/githooks/config"
+	. "github.com/stefan-niemeyer/githooks/hooks"
+	. "github.com/stefan-niemeyer/githooks/types"
+	. "github.com/stefan-niemeyer/githooks/utils"
 	"strings"
 )
 

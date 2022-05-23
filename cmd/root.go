@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/xiabai84/githooks/utils"
+	"github.com/stefan-niemeyer/githooks/utils"
 	"os"
 
 	"github.com/spf13/cobra"

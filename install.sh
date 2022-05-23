@@ -13,7 +13,7 @@ if [ "x${OSTYPE}" = "x" ]; then
     OSTYPE="darwin"
     ;;
   *)
-    echo 'Warning: Only Linux and MacOS operating systems are currently supported! For Windows-OS,
+    echo 'Warning: Only Linux and macOS operating systems are currently supported! For Windows-OS,
     please copy the tar.gz file directly.'
     exit 1
     ;;
@@ -28,7 +28,7 @@ if [ "x${ARCH}" = "x" ]; then
   armv8*)
     ARCH=arm64
     ;;
-  aarch64*)
+  aarch64* | arm64*)
     ARCH=arm64
     ;;
   *)
@@ -39,7 +39,7 @@ if [ "x${ARCH}" = "x" ]; then
 fi
 
 if [ "x${DOWNLOAD_URL}" = "x" ]; then
-  DOWNLOAD_URL="$(curl -sL "https://api.github.com/repos/xiabai84/githooks/releases/latest" |
+  DOWNLOAD_URL="$(curl -sL "https://api.github.com/repos/stefan-niemeyer/githooks/releases/latest" |
     grep browser_download_url |
     cut -d '"' -f 4 |
     grep "$OSTYPE-$ARCH")"
@@ -59,14 +59,14 @@ if [ $? -ne 0 ]; then
   echo ""
   echo "Please verify the version you are trying to download."
   echo ""
-  exit
+  exit 1
 fi
 
 ret='0'
 command -v tar >/dev/null 2>&1 || { ret='1'; }
 if [ "$ret" -eq 0 ]; then
   tar -xzf "${filename}"
-  echo "Installation Complete!"
+  echo "Installation Complete! Please copy 'githooks' in a folder in your PATH"
 else
   echo "$filename Download Complete!"
   echo ""

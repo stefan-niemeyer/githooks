@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	. "github.com/xiabai84/githooks/hooks"
+	. "github.com/stefan-niemeyer/githooks/hooks"
 )
 
 var initCmd = &cobra.Command{

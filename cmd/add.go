@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/manifoldco/promptui"
-	. "github.com/xiabai84/githooks/hooks"
-	. "github.com/xiabai84/githooks/types"
+	. "github.com/stefan-niemeyer/githooks/hooks"
+	. "github.com/stefan-niemeyer/githooks/types"
 	"strings"
 
 	"github.com/spf13/cobra"

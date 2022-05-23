@@ -11,7 +11,6 @@ builds:
     goos:
       - linux
       - darwin
-      - windows
     tags:
       containers_image_openpgp
     ldflags:
@@ -40,7 +39,7 @@ nfpms:
   - file_name_template: "githooks-v{{ .Version }}-{{.Os}}-{{.Arch}}"
     homepage: https://github.com/stefan-niemeyer/githooks
     description: "Write something ."
-    maintainer: xiabai84
+    maintainer: stefan-niemeyer
     license: None
     vendor: None
     formats:

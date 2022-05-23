@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/xiabai84/githooks/cmd"
+import "github.com/stefan-niemeyer/githooks/cmd"
 
 func main() {
 	cmd.Execute()

@@ -1,4 +1,4 @@
-module github.com/xiabai84/githooks
+module github.com/stefan-niemeyer/githooks
 
 go 1.18
 

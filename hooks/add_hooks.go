@@ -3,9 +3,9 @@ package hooks
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/xiabai84/githooks/config"
-	. "github.com/xiabai84/githooks/types"
-	. "github.com/xiabai84/githooks/utils"
+	. "github.com/stefan-niemeyer/githooks/config"
+	. "github.com/stefan-niemeyer/githooks/types"
+	. "github.com/stefan-niemeyer/githooks/utils"
 	. "io/ioutil"
 	"os"
 	"strings"

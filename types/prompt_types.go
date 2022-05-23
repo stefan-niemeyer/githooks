@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/manifoldco/promptui"
-	. "github.com/xiabai84/githooks/utils"
+	. "github.com/stefan-niemeyer/githooks/utils"
 )
 
 type Dialog struct {
