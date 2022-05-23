@@ -27,7 +27,7 @@ githooks cli-tool is a Linux command line application, which is developed with G
 Once it is build, you can launch it directly.
 
 ```shell
-$ curl -fsLO https://github.com/stefan-niemeyer/githooks/raw/main/githooks
+$ curl -sfL https://raw.githubusercontent.com/xiabai84/githooks/main/install.sh | sh
 $ chmod +x githooks
 $ mv githooks /usr/local/bin
 ```

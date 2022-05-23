@@ -1,0 +1,53 @@
+# Official documentation at http://goreleaser.com
+project_name: githooks
+builds:
+  - env:
+      - CGO_ENABLED=0
+    main: ./
+    binary: githooks
+    goarch:
+      - amd64
+      - arm64
+    goos:
+      - linux
+      - darwin
+      - windows
+    tags:
+      containers_image_openpgp
+    ldflags:
+      - -X github.com/stefan-niemeyer/githooks/version.version={{.Version}}
+      - -X github.com/stefan-niemeyer/githooks/version.gitCommit={{.ShortCommit}}
+      - -w
+      - -s
+dist: bin
+archives:
+  - name_template: "githooks-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    replacements:
+      linux: linux
+      amd64: amd64
+      arm64: arm64
+    files:
+      - none*
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Version }}-next-{{.ShortCommit}}"
+changelog:
+  skip: false
+  sort: asc
+
+nfpms:
+  - file_name_template: "githooks-v{{ .Version }}-{{.Os}}-{{.Arch}}"
+    homepage: https://github.com/stefan-niemeyer/githooks
+    description: "Write something ."
+    maintainer: xiabai84
+    license: None
+    vendor: None
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    replacements:
+      amd64: 64bit
+      arm64: arm64
+      linux: linux
