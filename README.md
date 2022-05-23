@@ -33,16 +33,25 @@ When you use `githooks` for the first time, you need to set up the usage by call
 $ githooks init
 ```
 
-TODO: @Bai: Please describe what `githooks init` does. What is --init for ??? 
+init-command will create all necessary configuration files under `$HOME/.githooks` such as `commit-msg` and `githooks.log`. 
+If you are not familiar with githooks, please don't touch these files.
 
 ## Adding a Project
-TODO: @Bai: Please describe what `githooks add` does. 
 
-## Deleting a Project
-TODO: @Bai: Please describe what `githooks delete` does. 
+```shell
+$ githooks add
+```
+**add** command will add a new project to githooks project's list by given project name, and it's workspace.
+Once it's done, it will generate a config file under the home-dir with following pattern: `.gitconfig-<PROJECT_NAME>` 
+Because githooks is basically a git-extension, it will append extra-config at the bottom of `$HOME/.gitconfig`.
 
 ## Listing the Projects
-TODO: @Bai: Please describe what `githooks list` does. 
+With **list** it will show user all from githooks managed projects as list view.
+
+## Deleting a Project
+**delete** will list all githooks-projects. User can select one of projects to delete by moving cursor.
+If a project was removed successfully, it's config files will also be removed or updated by githooks.
+Here again, if you are not familiar with githooks, just do not touch such config files, otherwise githooks will lose the control of it. 
 
 ## Under the Hood
 After adding the projects **Alpha** and **Beta** `githooks` will have created the following

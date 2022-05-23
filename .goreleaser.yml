@@ -38,7 +38,7 @@ changelog:
 nfpms:
   - file_name_template: "githooks-v{{ .Version }}-{{.Os}}-{{.Arch}}"
     homepage: https://github.com/stefan-niemeyer/githooks
-    description: "Write something ."
+    description: "githooks is a cli-tool to prevent commits without a Jira issue key in the first line of a commit message."
     maintainer: stefan-niemeyer
     license: None
     vendor: None
