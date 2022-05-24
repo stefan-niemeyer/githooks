@@ -4,10 +4,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [linux, darwin]
-        arch: [amd64, arm64]
     steps:
       - name: Set up Go 1.18
         uses: actions/setup-go@v1
@@ -19,12 +15,3 @@ jobs:
 
       - name: Test
         run: go test -v .
-
-      - name: Build OS ${{ matrix.os }} Arch ${{ matrix.arch }}
-        run: mkdir -p ./bin && GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o ./bin/githooks_${{ matrix.os }}_${{ matrix.arch }}
-
-      - name: Bin
-        uses: actions/upload-artifact@v2
-        with:
-          name: githooks_${{ matrix.os }}_${{ matrix.arch }}
-          path: ./bin/githooks_${{ matrix.os }}_${{ matrix.arch }}
