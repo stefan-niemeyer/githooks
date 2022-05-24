@@ -1,14 +1,13 @@
 package config
 
-var CommitMsg = `
-#!/usr/bin/env bash
+var CommitMsg = `#!/usr/bin/env bash
 
 # List of Jira projects whose keys will be accepted by the hook.
 # The installation procedure creates a RegExp of a comma separated list of project keys.
 # PROJECTS="(DS|MYJIRA|MARS)"               # Accept issue keys like DS-17 or MARS-6
 # PROJECTS="(MYJIRA)"                       # Accept only issue keys that start with MYJIRA, like MYJIRA-1966
 # PROJECTS="MYJIRA"                         # Same as "(MYJIRA)"
-# PROJECTS=""                               # Accept every issue key matching [[:alpha:]]+-[[:digit:]]+
+# PROJECTS=""                               # Accept every issue key matching [[:alpha:]][[:alnum:]]*-[[:digit:]]+
 
 PROJECTS=""
 
@@ -42,7 +41,7 @@ parse_first_message_line_for_tickets() {    # Pass the name of a file with the c
   else
     # Parse the first line of the commit message for any issue key
     echo "$FIRST_LINE" | \
-        grep --extended-regexp --regexp='[[:alpha:]]+-[[:digit:]]+' --only-matching | \
+        grep --extended-regexp --regexp='\<[[:alpha:]][[:alnum:]]*-[[:digit:]]+\>' --only-matching | \
         tr '[:lower:]' '[:upper:]'
   fi
 }
@@ -62,7 +61,7 @@ fi
 # Check if commit message contains valid issue keys or 'Merge'?
 if [[ "$CM_TICKETS" == "" && ! $FIRST_LINE =~ "Merge" ]]; then
   if [ -n "$PROJECTS" ]; then
-    echo >&2 "ERROR: The 1st line of the commit message is missing a Jira issue key matching '$PROJECTS'"
+    echo >&2 "ERROR: The 1st line of the commit message is missing a Jira issue key with a project key matching '$PROJECTS' (e.g. DS-123)"
   else
     echo >&2 "ERROR: The 1st line of the commit message is missing a Jira issue key (e.g. DS-123)."
   fi

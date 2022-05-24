@@ -9,7 +9,7 @@ the commit message will be enhanced with that key at the beginning.
 Of course, only if the first line does not already contain that key.
 
 <a name="global-installation"></a>
-# Global Installation with githooks (recommended)
+# 1. Global Installation with githooks (recommended)
 
 Sometimes you have multiple repositories in a folder, and they all should use the same hooks.
 This can be done via the Git configuration variable `core.hooksPath`.
@@ -27,34 +27,34 @@ $ chmod +x githooks
 $ mv githooks <folder-in-your-PATH>
 ```
 
-## Initialization
+## 1.1 Initialization
 When you use `githooks` for the first time, you need to set up the usage by calling
 ```shell
 $ githooks init
 ```
 
-init-command will create all necessary configuration files under `$HOME/.githooks` such as `commit-msg` and `githooks.log`. 
-If you are not familiar with githooks, please don't touch these files.
+The `init` command will create all necessary configuration files under `$HOME/.githooks` such as `commit-msg` and `githooks.log`. 
+If you are not familiar with `githooks`, please don't touch these files.
 
-## Adding a Project
+## 1.2 Adding a Project
 
 ```shell
 $ githooks add
 ```
-**add** command will add a new project to githooks project's list by given project name, and it's workspace.
-Once it's done, it will generate a config file under the home-dir with following pattern: `.gitconfig-<PROJECT_NAME>` 
-Because githooks is basically a git-extension, it will append extra-config at the bottom of `$HOME/.gitconfig`.
+The **add** command will add a new project to `githooks` projects list by a given project name, and it's workspace.
+Once it's done, it will generate a config file under the home directory with the following pattern: `.gitconfig-<PROJECT_NAME>` 
+Because `githooks` is basically a Git extension, it will append extra config at the bottom of `$HOME/.gitconfig`.
 
-## Listing the Projects
-With **list** it will show user all from githooks managed projects as list view.
+## 1.3 Listing the Projects
+By calling **list** `githooks` prints a list with all projects it 'manages'.
 
-## Deleting a Project
-**delete** will list all githooks-projects. User can select one of projects to delete by moving cursor.
-If a project was removed successfully, it's config files will also be removed or updated by githooks.
-Here again, if you are not familiar with githooks, just do not touch such config files, otherwise githooks will lose the control of it. 
+## 1.4 Deleting a Project
+**delete** will list all `githooks` projects. The user can select one of the projects to delete by moving the cursor.
+If a project was removed successfully, it's config files will also be removed or updated by `githooks`.
+Here again, if you are not familiar with `githooks`, just do not touch these config files, otherwise `githooks` will lose the control of it. 
 
-## Under the Hood
-After adding the projects **Alpha** and **Beta** `githooks` will have created the following
+# 2 Under the Hood
+Let's assume, you have called `githooks init` and added the projects **Alpha** and **Beta** with `githooks add`. Then `githooks` will have created the following
 file / folder structure
 
 ```
@@ -70,8 +70,8 @@ file / folder structure
 
 The file `.gitconfig` will contain the configuration settings depending on the location of the
 repositories. In the example below, the configuration file `.gitconfig-alpha` is read for
-all Git repositories that have `~/work/project-alpha` as parent folder.
-The setting for the project **Beta** are analog.
+all Git repositories that have `~/work/project-alpha` as a parent folder.
+The settings for the project **Beta** are analog.
 
 ```
 # settings in .gitconfig
@@ -97,12 +97,12 @@ It might look like this.
 The variable `core.hooksPath` is set to the folder with the shared hooks `~/.githooks`.
 
 The Git variable `user.jiraProjects` is used to set different Jira Project keys for the projects.
-This is a custom defined variable.
+This is a custom defined variable and not part of the Git core.
 
 Configuring the allowed Jira project keys via `git config` provides the same flexibility as setting them using the
 `PROJECTS` variable in the hook script. You can e.g. use regular expressions like `(GAMMA|DELTA)`.
 
-# Installation for a Single Repository
+# 3. Installation for a Single Repository
 
 The file `commit-msg` must be an executable file in the folder `.git/hooks` of a repository.
 If you changed this default folder via the Git configuration variable `core.hooksPath`,
@@ -120,12 +120,12 @@ You can install the script in multiple repositories, by passing the repository f
 $ ./install-jira-git-hook repo1 repo2 repo3
 ```
 
-## Restriction to specific Jira projects
+## 3.1 Restriction to specific Jira projects
 
 In case the issue key must belong to certain Jira projects, you can specify the Jira project key list.
 Just use the option `-p` or `--projects`.
 
-## Usage
+## 3.2 Usage
 ```
 Usage: install-jira-git-hook [ OPTIONS ] [ dir ... ]
 
