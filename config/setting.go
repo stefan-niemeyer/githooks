@@ -18,8 +18,7 @@ var GitConfigPatch = `[includeIf "gitdir:{{ .WorkDir }}"]
     path = .gitconfig-{{ toLower .Project }}
 `
 
-var HooksConfigTmpl = `
-[core]
+var HooksConfigTmpl = `[core]
     hooksPath=~/.githooks
 [user]
     jiraProjects={{ .JiraName }}

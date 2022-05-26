@@ -14,9 +14,9 @@ builds:
     tags:
       containers_image_openpgp
     ldflags:
-      - -X github.com/stefan-niemeyer/githooks/provenance.version={{.Version}}
-      - -X github.com/stefan-niemeyer/githooks/provenance.gitCommit={{.ShortCommit}}
-      - -X github.com/stefan-niemeyer/githooks/provenance.buildDate={{.Date}}
+      - -X github.com/stefan-niemeyer/githooks/buildInfo.version={{.Version}}
+      - -X github.com/stefan-niemeyer/githooks/buildInfo.gitCommit={{.ShortCommit}}
+      - -X github.com/stefan-niemeyer/githooks/buildInfo.buildDate={{.Date}}
       - -w
       - -s
 dist: bin

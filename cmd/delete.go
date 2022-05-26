@@ -58,7 +58,7 @@ var deleteCmd = &cobra.Command{
 				fmt.Println("Canceled")
 			}
 			if confirmed != "y" {
-				os.Exit(-1)
+				os.Exit(1)
 			}
 			DeleteSelectedProject(&hookArr[i])
 		} else {

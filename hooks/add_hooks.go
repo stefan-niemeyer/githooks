@@ -3,6 +3,7 @@ package hooks
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
@@ -31,20 +32,20 @@ func CheckConfigFiles() {
 
 	switch {
 	case err1 != nil:
-		fmt.Println("❌ Githooks relies on git, please configure your local git first.")
-		os.Exit(-1)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GitConfigPath)
+		os.Exit(1)
 
 	case err2 != nil:
-		fmt.Printf("❌ File %s doesn't exist, please perform githooks init first.", HookDir)
-		os.Exit(-1)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", HookDir)
+		os.Exit(1)
 
 	case err3 != nil:
-		fmt.Printf("❌ File %s doesn't exist, please perform githooks init first.", CommitMsgPath)
-		os.Exit(-1)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", CommitMsgPath)
+		os.Exit(1)
 
 	case err4 != nil:
-		fmt.Printf("❌ File %s doesn't exist, please perform githooks init first.", GithooksLogPath)
-		os.Exit(-1)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GithooksLogPath)
+		os.Exit(1)
 	}
 }
 
@@ -52,8 +53,8 @@ func previewGitConfigFile(hooks *GitHooks) {
 	viewHeader := "========================== .gitconfig ==========================\n"
 	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigPath)
-		os.Exit(-1)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup git first.\n", GitConfigPath)
+		os.Exit(1)
 	}
 	configContent := string(bContent)
 	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
@@ -91,14 +92,14 @@ func createNewGitConfig(hooks *GitHooks) {
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)
-	fmt.Println("✅  Create new file:", gitConfigPath)
+	fmt.Println(promptui.IconGood+"  Create new file:", gitConfigPath)
 }
 
 func updateGitConfigFile(hooks *GitHooks) {
 	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
 		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigPath)
-		os.Exit(-1)
+		os.Exit(1)
 	}
 	configContent := string(bContent)
 	tmpl, err := template.New("simple-hook-config").Funcs(template.FuncMap{
@@ -111,5 +112,5 @@ func updateGitConfigFile(hooks *GitHooks) {
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)
-	fmt.Println("✅  Updated file:", GitConfigPath)
+	fmt.Println(promptui.IconGood+"  Updated file:", GitConfigPath)
 }

@@ -5,6 +5,8 @@ import (
 	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/hooks"
 	. "github.com/stefan-niemeyer/githooks/types"
+	. "github.com/stefan-niemeyer/githooks/utils"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,18 +21,26 @@ var addCmd = &cobra.Command{
 		CheckConfigFiles()
 
 		projName := GetPromptInput(Dialog{
-			ErrorMsg: "❌ Please provide a Jira project key to track.",
-			Label:    "🌟 Enter your Jira project's name:",
-		})
+			ErrorMsg: "Please provide a Jira project key to track.",
+			Label:    "Enter your Jira project key:",
+		}, "")
 
+		cwd, errCwd := os.Getwd()
+		CheckError(errCwd)
+		homeDir := os.Getenv("HOME")
+		if len(homeDir) != 0 {
+			cwd = strings.Replace(cwd, homeDir, "~", 1)
+		}
+		if !strings.HasSuffix(cwd, "/") {
+			cwd += "/"
+		}
 		workDir := GetPromptInput(Dialog{
-			ErrorMsg: "❌ Please a path to workspace.",
-			Label:    fmt.Sprintf("🌟 Enter path to your workspace:"),
-		})
+			ErrorMsg: "Please enter a path to your workspace.",
+			Label:    fmt.Sprintf("Enter path to your workspace (%s):", cwd),
+		}, cwd)
 
-		hasSlash := strings.HasSuffix(workDir, "/")
-		if !hasSlash {
-			workDir = workDir + "/"
+		if !strings.HasSuffix(workDir, "/") {
+			workDir += "/"
 		}
 
 		newHook := GitHooks{Project: projName, JiraName: strings.ToUpper(projName), WorkDir: workDir}
@@ -43,7 +53,7 @@ var addCmd = &cobra.Command{
 
 		confirmed, err := prompt.Run()
 		if err != nil {
-			fmt.Println("❌ Canceled setting new githooks project.")
+			fmt.Println(promptui.IconBad + " Cancelled adding of a new githooks project.")
 		}
 
 		if confirmed == "y" {

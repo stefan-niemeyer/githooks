@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/stefan-niemeyer/githooks/provenance"
+	"github.com/stefan-niemeyer/githooks/buildInfo"
 )
 
 var versionCmd = &cobra.Command{
@@ -12,7 +12,7 @@ var versionCmd = &cobra.Command{
 	Long:    `Prints the githooks version`,
 	Example: `githooks version`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(provenance.GetProvenance().Full())
+		fmt.Println(buildInfo.GetBuildInfo().ToString())
 	},
 }
 

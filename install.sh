@@ -4,7 +4,7 @@ OSTYPE=""
 ARCH=""
 DOWNLOAD_URL=""
 
-if [ "x${OSTYPE}" = "x" ]; then
+if [ -z "${OSTYPE}" ]; then
   case $(uname) in
   "Linux")
     OSTYPE="linux"
@@ -13,14 +13,14 @@ if [ "x${OSTYPE}" = "x" ]; then
     OSTYPE="darwin"
     ;;
   *)
-    echo 'Warning: Only Linux and macOS operating systems are currently supported! For Windows-OS,
-    please copy the tar.gz file directly.'
+    echo -e "Warning: Only Linux and macOS operating systems are currently supported!\nFor Windows-OS,
+    please copy the tar.gz file directly."
     exit 1
     ;;
   esac
 fi
 
-if [ "x${ARCH}" = "x" ]; then
+if [ -z "${ARCH}" ]; then
   case "$(uname -m)" in
   x86_64)
     ARCH=amd64
@@ -32,45 +32,34 @@ if [ "x${ARCH}" = "x" ]; then
     ARCH=arm64
     ;;
   *)
-    echo "${ARCH}, isn't supported"
+    echo "$(uname -m), isn't supported"
     exit 1
     ;;
   esac
 fi
 
-if [ "x${DOWNLOAD_URL}" = "x" ]; then
-  DOWNLOAD_URL="$(curl -sL "https://api.github.com/repos/stefan-niemeyer/githooks/releases/latest" |
-    grep browser_download_url |
-    cut -d '"' -f 4 |
-    grep "$OSTYPE-$ARCH")"
+if [ -z "${DOWNLOAD_URL}" ]; then
+  DOWNLOAD_URL=$(curl -sL "https://api.github.com/repos/stefan-niemeyer/githooks/releases/latest" | \
+    grep -Ee "browser_download_url.*$OSTYPE-$ARCH.tar.gz" | \
+    sed -Ee 's/^ *"browser_download_url": *"(.*)"/\1/g')
 fi
 
 filename="${DOWNLOAD_URL##*/}"
-
 echo "Downloading githooks from ${DOWNLOAD_URL} ..."
 
 trap 'rm -f $filename' EXIT
 
-curl -fsLO "$DOWNLOAD_URL"
-
-if [ $? -ne 0 ]; then
-  echo ""
-  echo "Failed to download $filename!"
-  echo ""
-  echo "Please verify the version you are trying to download."
-  echo ""
+if ! curl -fsLO "$DOWNLOAD_URL"; then
+  echo -e "\nFailed to download $filename!\n\nPlease verify the version you are trying to download.\n"
   exit 1
 fi
 
-ret='0'
-command -v tar >/dev/null 2>&1 || { ret='1'; }
-if [ "$ret" -eq 0 ]; then
+if command -v tar >/dev/null 2>&1
+then
   tar -xzf "${filename}"
-  echo "Installation Complete! Please copy 'githooks' in a folder in your PATH"
+  echo "Installation Complete! Please copy githooks in a folder in your PATH"
 else
-  echo "$filename Download Complete!"
-  echo ""
-  echo "Try to unpack the ${filename} failed."
-  echo "tar: command not found, please unpack the ${filename} manually."
+  echo -e "$filename Download complete!\nUnpacking ${filename} failed."
+  echo "tar: command not found, please unpack ${filename} manually."
   exit 1
 fi

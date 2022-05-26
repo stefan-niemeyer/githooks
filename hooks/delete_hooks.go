@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
@@ -18,7 +19,7 @@ func DeleteSelectedProject(hooks *GitHooks) {
 	overwriteGitconfig(hooks)
 	removeCurrentHookFromLog(hooks)
 	deleteHookGitConfig(hooks)
-	fmt.Println("✅  Removed project", hooks.Project)
+	fmt.Println(promptui.IconGood+"  Removed project", hooks.Project)
 }
 
 func removeCurrentHookFromLog(hooks *GitHooks) {
