@@ -19,8 +19,8 @@ var listCmd = &cobra.Command{
 
 		ghConfig := ReadGitHooksConfig()
 		empty := Workspace{Name: "Quit"}
+		preselectIdx := GetWorkspaceIndex(ghConfig.Workspaces)
 		ghConfig.Workspaces = append(ghConfig.Workspaces, empty)
-
 		templates := &promptui.SelectTemplates{
 			Label:    "{{ . }}",
 			Active:   "➣ {{ .Name | cyan }}",
@@ -42,6 +42,7 @@ var listCmd = &cobra.Command{
 			Templates: templates,
 			Size:      5,
 			Searcher:  searcher,
+			CursorPos: preselectIdx,
 		}
 
 		_, _, err := prompt.Run()

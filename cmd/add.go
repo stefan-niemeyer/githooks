@@ -33,8 +33,8 @@ var addCmd = &cobra.Command{
 
 		cwd, errCwd := os.Getwd()
 		CheckError(errCwd)
-		homeDir := os.Getenv("HOME")
-		if len(homeDir) != 0 {
+		homeDir, err := os.UserHomeDir()
+		if err == nil && len(homeDir) != 0 {
 			cwd = strings.Replace(cwd, homeDir, "~", 1)
 		}
 		if !strings.HasSuffix(cwd, "/") {
