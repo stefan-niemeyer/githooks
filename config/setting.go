@@ -8,26 +8,29 @@ var HomeDir, _ = os.UserHomeDir()
 var HookDir = HomeDir + "/.githooks"
 
 const GithooksLogName = "githooks.log"
+const GithooksConfigName = "githooks.json"
 const CommitMsgName = "commit-msg"
 
 var GithooksLogPath = HookDir + "/" + GithooksLogName
+var GithooksConfigPath = HookDir + "/" + GithooksConfigName
 var CommitMsgPath = HookDir + "/" + CommitMsgName
 var GitConfigPath = HomeDir + "/.gitconfig"
 
-var GitConfigPatch = `[includeIf "gitdir:{{ .WorkDir }}"]
-    path = .gitconfig-{{ toLower .Project }}
+var GitConfigPatch = `[includeIf "gitdir:{{ .Folder }}"]
+    path = .gitconfig-{{ toLower .Name }}
 `
 
 var HooksConfigTmpl = `[core]
     hooksPath=~/.githooks
 [user]
-    jiraProjects={{ .JiraName }}
+    jiraProjects={{ .ProjectKeyRE }}
 `
 
 var DetailTmpl = `
-{{ if ne .Project "Quit" }}
------------------- Project's Configuration --------------------
-Jira Project Name: {{ .Project | faint }}
-Project Workspace: {{ .WorkDir | faint }}
+{{ if ne .Name "Quit" }}
+------------------ Workspace Configuration --------------------
+Name: {{ .Name | faint }}
+Folder: {{ .Folder | faint }}
+Jira Project Key RegEx: {{ .ProjectKeyRE | faint }}
 {{ end }}
 `

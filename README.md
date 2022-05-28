@@ -36,25 +36,28 @@ $ githooks init
 The `init` command will create all necessary configuration files under `$HOME/.githooks` such as `commit-msg` and `githooks.log`. 
 If you are not familiar with `githooks`, please don't touch these files.
 
-## 1.2 Adding a Project
+## 1.2 Adding a Workspace
 
 ```shell
 $ githooks add
 ```
-The **add** command will add a new project to `githooks` projects list by a given project name, and it's workspace.
+The **add** command will add a new workspace to the `githooks` workspace list by a given workspace name, 
+the Jira project key, and it's workspace folder.
 Once it's done, it will generate a config file under the home directory with the following pattern: `.gitconfig-<PROJECT_NAME>` 
 Because `githooks` is basically a Git extension, it will append extra config at the bottom of `$HOME/.gitconfig`.
 
-## 1.3 Listing the Projects
-By calling **list** `githooks` prints a list with all projects it 'manages'.
+## 1.3 Listing the Workspaces
+By calling **list** `githooks` prints a list with all workspaces it 'manages'.
 
-## 1.4 Deleting a Project
-**delete** will list all `githooks` projects. The user can select one of the projects to delete by moving the cursor.
-If a project was removed successfully, it's config files will also be removed or updated by `githooks`.
-Here again, if you are not familiar with `githooks`, just do not touch these config files, otherwise `githooks` will lose the control of it. 
+## 1.4 Deleting a Workspace
+**delete** will list all `githooks` workspaces. The user can select one of the workspaces to delete by moving the cursor.
+If a workspace was removed successfully, it's config files will also be removed or updated by `githooks`.
+Here again, if you are not familiar with `githooks`, just do not touch these config files,
+otherwise `githooks` will lose the control of it. 
 
 # 2 Under the Hood
-Let's assume, you have called `githooks init` and added the projects **Alpha** and **Beta** with `githooks add`. Then `githooks` will have created the following
+Let's assume, you have called `githooks init` and added the workspaces **Alpha** and **Beta** with `githooks add`.
+Then `githooks` will have created the following
 file / folder structure
 
 ```
@@ -64,7 +67,7 @@ file / folder structure
 ├── .gitconfig-beta
 └── .githooks
     ├── commit-msg
-    └── githooks.log
+    └── githooks.json
     
 ```
 
@@ -96,7 +99,7 @@ It might look like this.
 
 The variable `core.hooksPath` is set to the folder with the shared hooks `~/.githooks`.
 
-The Git variable `user.jiraProjects` is used to set different Jira Project keys for the projects.
+The Git variable `user.jiraProjects` is used to set different Jira Project keys for the workspaces.
 This is a custom defined variable and not part of the Git core.
 
 Configuring the allowed Jira project keys via `git config` provides the same flexibility as setting them using the

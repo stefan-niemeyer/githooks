@@ -1,7 +1,6 @@
 package hooks
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/config"
@@ -13,22 +12,22 @@ import (
 	"text/template"
 )
 
-func AddGithooks(newHoook *GitHooks) {
-	persistHooksAsLog(newHoook)
-	createNewGitConfig(newHoook)
-	updateGitConfigFile(newHoook)
+func AddWorkspace(newWorkspace *Workspace) {
+	persistConfigAsJson(newWorkspace)
+	createWorkspaceGitConfig(newWorkspace)
+	updateGitConfigFile(newWorkspace)
 }
 
-func PreviewConfig(newHook *GitHooks) {
-	previewGitConfigFile(newHook)
-	previewNewGitConfig(newHook)
+func PreviewConfig(newWorkspace *Workspace) {
+	previewGitConfigFile(newWorkspace)
+	previewWorkspaceGitConfig(newWorkspace)
 }
 
 func CheckConfigFiles() {
 	_, err1 := os.Stat(GitConfigPath)
 	_, err2 := os.Stat(HookDir)
 	_, err3 := os.Stat(CommitMsgPath)
-	_, err4 := os.Stat(GithooksLogPath)
+	_, err4 := os.Stat(GithooksConfigPath)
 
 	switch {
 	case err1 != nil:
@@ -44,12 +43,12 @@ func CheckConfigFiles() {
 		os.Exit(1)
 
 	case err4 != nil:
-		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GithooksLogPath)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GithooksConfigPath)
 		os.Exit(1)
 	}
 }
 
-func previewGitConfigFile(hooks *GitHooks) {
+func previewGitConfigFile(workspace *Workspace) {
 	viewHeader := "========================== .gitconfig ==========================\n"
 	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
@@ -61,41 +60,38 @@ func previewGitConfigFile(hooks *GitHooks) {
 		"toLower": strings.ToLower,
 	}).Parse(viewHeader + configContent + GitConfigPatch)
 	CheckError(err)
-	err = tmpl.Execute(os.Stdout, hooks)
+	err = tmpl.Execute(os.Stdout, workspace)
 	CheckError(err)
 }
 
-func previewNewGitConfig(hooks *GitHooks) {
-	viewHeader := "========================== .gitconfig-" + strings.ToLower(hooks.Project) + " ==========================\n"
+func previewWorkspaceGitConfig(workspace *Workspace) {
+	viewHeader := "========================== .gitconfig-" + strings.ToLower(workspace.Name) + " ==========================\n"
 	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + HooksConfigTmpl)
 	CheckError(err)
-	err = tmpl.Execute(os.Stdout, hooks)
+	err = tmpl.Execute(os.Stdout, workspace)
 	CheckError(err)
 }
 
-func persistHooksAsLog(hooks *GitHooks) {
-	content, err := os.ReadFile(GithooksLogPath)
-	CheckError(err)
-	hookJson, _ := json.Marshal(hooks)
-	newContent := string(content) + string(hookJson) + "\n"
-	err = os.WriteFile(GithooksLogPath, []byte(newContent), 0755)
-	CheckError(err)
+func persistConfigAsJson(workspace *Workspace) {
+	ghConfig := ReadGitHooksConfig()
+	ghConfig.Workspaces = append(ghConfig.Workspaces, *workspace)
+	WriteGitHooksConfig(&ghConfig)
 }
 
-func createNewGitConfig(hooks *GitHooks) {
-	gitConfigPath := GitConfigPath + "-" + strings.ToLower(hooks.Project)
+func createWorkspaceGitConfig(workspace *Workspace) {
+	gitConfigPath := GitConfigPath + "-" + strings.ToLower(workspace.Name)
 	tmpl, err := template.New("jira-config").Parse(HooksConfigTmpl)
 	CheckError(err)
 	f, err := os.Create(gitConfigPath)
 	CheckError(err)
-	err = tmpl.Execute(f, hooks)
+	err = tmpl.Execute(f, workspace)
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)
 	fmt.Println(promptui.IconGood+"  Create new file:", gitConfigPath)
 }
 
-func updateGitConfigFile(hooks *GitHooks) {
+func updateGitConfigFile(workspace *Workspace) {
 	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
 		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigPath)
@@ -108,7 +104,7 @@ func updateGitConfigFile(hooks *GitHooks) {
 	CheckError(err)
 	f, err := os.Create(GitConfigPath)
 	CheckError(err)
-	err = tmpl.Execute(f, hooks)
+	err = tmpl.Execute(f, workspace)
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)

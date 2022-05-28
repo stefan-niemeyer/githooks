@@ -3,6 +3,7 @@ package hooks
 import (
 	"fmt"
 	"github.com/manifoldco/promptui"
+	"github.com/stefan-niemeyer/githooks/buildInfo"
 	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
@@ -10,8 +11,11 @@ import (
 	"text/template"
 )
 
-func InitHooks() GitHooks {
-	hook := GitHooks{}
+func InitHooks() GitHookConfig {
+	ghConfig := GitHookConfig{
+		Version:    buildInfo.GetBuildInfo().Version,
+		Workspaces: []Workspace{},
+	}
 	CreateDirIfNotExists(HookDir)
 
 	_, errorGitConfig := os.Stat(GitConfigPath)
@@ -32,19 +36,15 @@ func InitHooks() GitHooks {
 		CheckError(err)
 		err = os.Chmod(CommitMsgPath, 0755)
 		CheckError(err)
-		err = tmpl.Execute(f, &hook)
+		err = tmpl.Execute(f, &ghConfig)
 		CheckError(err)
 		err = f.Close()
 		CheckError(err)
 		fmt.Println(promptui.IconGood+"  Created file", CommitMsgPath)
 	}
 
-	_, errorLog := os.Stat(GithooksLogPath)
-	if errorLog != nil {
-		_, err := os.Create(GithooksLogPath)
-		CheckError(err)
-		fmt.Println(promptui.IconGood+"  Created file", GithooksLogPath)
-	}
+	WriteGitHooksConfig(&ghConfig)
+	fmt.Println(promptui.IconGood+"  Created file", GithooksConfigPath)
 
-	return hook
+	return ghConfig
 }

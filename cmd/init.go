@@ -7,8 +7,8 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "setup your local githooks",
-	Long:  `setup your local githooks`,
+	Short: "Setup your githooks workspace configuration",
+	Long:  `Setup your githooks workspace configuration`,
 	Run: func(cmd *cobra.Command, args []string) {
 		InitHooks()
 	},
@@ -16,5 +16,4 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-	rootCmd.PersistentFlags().StringP("init", "i", "", "setup your githooks")
 }

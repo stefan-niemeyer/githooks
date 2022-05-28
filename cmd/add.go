@@ -15,15 +15,21 @@ import (
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a new workspace with githooks",
-	Long:  `A longer description`,
+	Long:  `Add a new workspace with githooks`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		CheckConfigFiles()
 
 		projName := GetPromptInput(Dialog{
-			ErrorMsg: "Please provide a Jira project key to track.",
-			Label:    "Enter your Jira project key:",
+			ErrorMsg: "Please provide a name for the workspace.",
+			Label:    "Enter your workspace name:",
 		}, "")
+
+		jiraName := strings.ToUpper(projName)
+		jiraName = GetPromptInput(Dialog{
+			ErrorMsg: "Please provide a Jira project key RegEx to track, e.g. ALPHA or (ALPHA|BETA)",
+			Label:    fmt.Sprintf("Enter your Jira project key RegEx (%s):", jiraName),
+		}, jiraName)
 
 		cwd, errCwd := os.Getwd()
 		CheckError(errCwd)
@@ -43,8 +49,12 @@ var addCmd = &cobra.Command{
 			workDir += "/"
 		}
 
-		newHook := GitHooks{Project: projName, JiraName: strings.ToUpper(projName), WorkDir: workDir}
-		PreviewConfig(&newHook)
+		newWorkspace := Workspace{
+			Name:         projName,
+			ProjectKeyRE: strings.ToUpper(jiraName),
+			Folder:       workDir,
+		}
+		PreviewConfig(&newWorkspace)
 
 		prompt := promptui.Prompt{
 			Label:     "Input was correct",
@@ -53,11 +63,11 @@ var addCmd = &cobra.Command{
 
 		confirmed, err := prompt.Run()
 		if err != nil {
-			fmt.Println(promptui.IconBad + " Cancelled adding of a new githooks project.")
+			fmt.Println(promptui.IconBad + " Canceled adding of a new githooks workspace.")
 		}
 
-		if confirmed == "y" {
-			AddGithooks(&newHook)
+		if strings.ToLower(confirmed) == "y" {
+			AddWorkspace(&newWorkspace)
 		}
 	},
 }

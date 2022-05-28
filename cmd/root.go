@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/stefan-niemeyer/githooks/hooks"
 	"github.com/stefan-niemeyer/githooks/utils"
 	"os"
 
@@ -13,8 +14,8 @@ var cfgFile string
 
 var rootCmd = &cobra.Command{
 	Use:   "githooks",
-	Short: "githooks help developer on setting name's conventions of git-commit-msg ",
-	Long:  `githooks prevent developer enter unexpected commit messages, which don't contain predefined name's conventions.'`,
+	Short: "githooks helps developers with setting name conventions of a Git commit message",
+	Long:  `githooks prevents developer to enter commit messages, which don't contain predefined Jira issue keys.'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.CheckArgs(cmd, args)
 	},
@@ -27,6 +28,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	hooks.MigrateGitHooksConfig()
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -45,10 +47,11 @@ func initConfig() {
 		viper.SetConfigName(".githooks")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	viper.AutomaticEnv() // read environment variables that match
 
-	// If a config file is found, read it in.
+	// If a config file is found, read it.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		_, err := fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		utils.CheckError(err)
 	}
 }

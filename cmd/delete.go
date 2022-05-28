@@ -15,31 +15,33 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete a githooks project and its settings",
-	Long:  `A longer description `,
+	Short: "Delete a githooks workspace and its settings.",
+	Long:  `Delete a githooks workspace and its settings`,
 	Run: func(cmd *cobra.Command, args []string) {
-		hookArr := ReadFromGitHookLog()
-		empty := GitHooks{Project: "Quit"}
-		hookArr = append(hookArr, empty)
+		CheckConfigFiles()
+
+		ghConfig := ReadGitHooksConfig()
+		empty := Workspace{Name: "Quit"}
+		workspaces := append(ghConfig.Workspaces, empty)
 
 		templates := &promptui.SelectTemplates{
 			Label:    "{{ . }}",
-			Active:   "➣ {{ .Project | cyan }}",
-			Inactive: "  {{ .Project | cyan }}",
-			Selected: "➣ {{ .Project | red | cyan }}",
+			Active:   "➣ {{ .Name | cyan }}",
+			Inactive: "  {{ .Name | cyan }}",
+			Selected: "➣ {{ .Name | red | cyan }}",
 			Details:  DetailTmpl,
 		}
 
 		searcher := func(input string, index int) bool {
-			hook := hookArr[index]
-			name := strings.Replace(strings.ToLower(hook.Project), " ", "", -1)
+			workspace := workspaces[index]
+			name := strings.Replace(strings.ToLower(workspace.Name), " ", "", -1)
 			input = strings.Replace(strings.ToLower(input), " ", "", -1)
 			return strings.Contains(name, input)
 		}
 
 		prompt1 := promptui.Select{
 			Label:     "Delete:",
-			Items:     hookArr,
+			Items:     workspaces,
 			Templates: templates,
 			Size:      5,
 			Searcher:  searcher,
@@ -48,19 +50,19 @@ var deleteCmd = &cobra.Command{
 		i, _, err := prompt1.Run()
 		CheckError(err)
 
-		if hookArr[i].Project != "Quit" {
+		if workspaces[i].Name != "Quit" {
 			prompt2 := promptui.Prompt{
-				Label:     "Really want to delete this project",
+				Label:     "Do you Really want to delete this workspace",
 				IsConfirm: true,
 			}
 			confirmed, err := prompt2.Run()
 			if err != nil {
 				fmt.Println("Canceled")
 			}
-			if confirmed != "y" {
+			if strings.ToLower(confirmed) != "y" {
 				os.Exit(1)
 			}
-			DeleteSelectedProject(&hookArr[i])
+			DeleteSelectedWorkspace(&ghConfig, i)
 		} else {
 			os.Exit(0)
 		}

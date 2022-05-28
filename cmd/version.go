@@ -18,5 +18,4 @@ var versionCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.PersistentFlags().StringP("version", "v", "", "Prints the githooks version")
 }

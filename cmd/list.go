@@ -12,31 +12,33 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all from githooks managed projects.",
-	Long:  `List all githooks managed projects`,
+	Short: "List all workspaces managed by githooks.",
+	Long:  `List all workspaces managed by githooks`,
 	Run: func(cmd *cobra.Command, args []string) {
-		hookArr := ReadFromGitHookLog()
-		empty := GitHooks{Project: "Quit"}
-		hookArr = append(hookArr, empty)
+		CheckConfigFiles()
+
+		ghConfig := ReadGitHooksConfig()
+		empty := Workspace{Name: "Quit"}
+		ghConfig.Workspaces = append(ghConfig.Workspaces, empty)
 
 		templates := &promptui.SelectTemplates{
 			Label:    "{{ . }}",
-			Active:   "➣ {{ .Project | cyan }}",
-			Inactive: "  {{ .Project | cyan }}",
-			Selected: "➣ {{ .Project | red | cyan }}",
+			Active:   "➣ {{ .Name | cyan }}",
+			Inactive: "  {{ .Name | cyan }}",
+			Selected: "➣ {{ .Name | red | cyan }}",
 			Details:  DetailTmpl,
 		}
 
 		searcher := func(input string, index int) bool {
-			hook := hookArr[index]
-			projName := strings.Replace(strings.ToLower(hook.Project), " ", "", -1)
+			workspace := ghConfig.Workspaces[index]
+			name := strings.Replace(strings.ToLower(workspace.Name), " ", "", -1)
 			input = strings.Replace(strings.ToLower(input), " ", "", -1)
-			return strings.Contains(projName, input)
+			return strings.Contains(name, input)
 		}
 
 		prompt := promptui.Select{
-			Label:     "Active Githooks config file(s):",
-			Items:     hookArr,
+			Label:     "Active githooks workspaces:",
+			Items:     ghConfig.Workspaces,
 			Templates: templates,
 			Size:      5,
 			Searcher:  searcher,
@@ -49,5 +51,4 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.PersistentFlags().StringP("list", "l", "", "List all githooks projects")
 }
