@@ -33,7 +33,9 @@ When you use `githooks` for the first time, you need to set up the usage by call
 $ githooks init
 ```
 
-The `init` command will create all necessary configuration files under `$HOME/.githooks` such as `commit-msg` and `githooks.log`. 
+The `init` command will create the Git hook script `commit-msg` under `$HOME/.githooks`. Further configuration files
+will be created under `$HOME/.githooks/config`. This folder is called the **githooks config folder** in this documentation.
+Here you will find files such as `githooks.json`. 
 If you are not familiar with `githooks`, please don't touch these files.
 
 ## 1.2 Adding a Workspace
@@ -43,7 +45,7 @@ $ githooks add
 ```
 The **add** command will add a new workspace to the `githooks` workspace list by a given workspace name, 
 the Jira project key, and it's workspace folder.
-Once it's done, it will generate a config file under the home directory with the following pattern: `.gitconfig-<PROJECT_NAME>` 
+Once it's done, it will generate a config file under the githooks config folder with the following pattern: `gitconfig-<PROJECT_NAME>` 
 Because `githooks` is basically a Git extension, it will append extra config at the bottom of `$HOME/.gitconfig`.
 
 ## 1.3 Listing the Workspaces
@@ -63,33 +65,34 @@ file / folder structure
 ```
 ~
 ├── .gitconfig
-├── .gitconfig-alpha
-├── .gitconfig-beta
 └── .githooks
     ├── commit-msg
-    └── githooks.json
+    └── config
+        ├── gitconfig-alpha
+        ├── gitconfig-beta
+        └── githooks.json
     
 ```
 
 The file `.gitconfig` will contain the configuration settings depending on the location of the
-repositories. In the example below, the configuration file `.gitconfig-alpha` is read for
-all Git repositories that have `~/work/project-alpha` as a parent folder.
+repositories. In the example below, the configuration file `gitconfig-alpha` is read for
+all Git repositories that have `~/work/ws-alpha` as a parent folder.
 The settings for the project **Beta** are analog.
 
 ```
 # settings in .gitconfig
 
-[includeIf "gitdir:~/work/project-alpha/"]
-    path = .gitconfig-alpha
-[includeIf "gitdir:~/work/project-beta/"]
-    path = .gitconfig-beta
+[includeIf "gitdir:~/work/ws-alpha/"]
+    path = .githooks/config/gitconfig-alpha
+[includeIf "gitdir:~/work/ws-beta/"]
+    path = .githooks/config/gitconfig-beta
 ```
 
-The files `.gitconfig-alpha` and `.gitconfig-beta` set the Git hooks folder and the allowed Jira project keys.
+The files `gitconfig-alpha` and `gitconfig-beta` set the Git hooks folder and the allowed Jira project keys.
 It might look like this.
 
 ```
-# settings in .gitconfig-alpha
+# settings in gitconfig-alpha
 
 [core]
     hooksPath=~/.githooks

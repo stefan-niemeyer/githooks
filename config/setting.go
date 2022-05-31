@@ -4,24 +4,28 @@ import (
 	"os"
 )
 
-var HomeDir, _ = os.UserHomeDir()
-var HookDir = HomeDir + "/.githooks"
-
+const GitHooksFolder = ".githooks"
+const GitHooksConfigFolder = "config"
 const GithooksLogName = "githooks.log"
 const GithooksConfigName = "githooks.json"
 const CommitMsgName = "commit-msg"
+const GitConfigFilename = ".gitconfig"
+const GitHooksConfigPraefix = "gitconfig"
 
-var GithooksLogPath = HookDir + "/" + GithooksLogName
-var GithooksConfigPath = HookDir + "/" + GithooksConfigName
+var HomeDir, _ = os.UserHomeDir()
+var HookDir = HomeDir + "/" + GitHooksFolder
+var HookConfigDir = HookDir + "/" + GitHooksConfigFolder
+var GithooksLogPath = HookConfigDir + "/" + GithooksLogName
+var GithooksConfigPath = HookConfigDir + "/" + GithooksConfigName
 var CommitMsgPath = HookDir + "/" + CommitMsgName
-var GitConfigPath = HomeDir + "/.gitconfig"
+var GitConfigPath = HomeDir + "/" + GitConfigFilename
 
 var GitConfigPatch = `[includeIf "gitdir:{{ .Folder }}"]
-    path = .gitconfig-{{ toLower .Name }}
+    path = ` + GitHooksFolder + `/` + GitHooksConfigFolder + `/` + GitHooksConfigPraefix + `-{{ toLower .Name }}
 `
 
 var HooksConfigTmpl = `[core]
-    hooksPath=~/.githooks
+    hooksPath=~/` + GitHooksFolder + `
 [user]
     jiraProjects={{ .ProjectKeyRE }}
 `

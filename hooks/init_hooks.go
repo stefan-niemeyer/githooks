@@ -17,6 +17,7 @@ func InitHooks() GitHookConfig {
 		Workspaces: []Workspace{},
 	}
 	CreateDirIfNotExists(HookDir)
+	CreateDirIfNotExists(HookConfigDir)
 
 	_, errorGitConfig := os.Stat(GitConfigPath)
 	if errorGitConfig != nil {

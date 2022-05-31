@@ -26,8 +26,9 @@ func PreviewConfig(newWorkspace *Workspace) {
 func CheckConfigFiles() {
 	_, err1 := os.Stat(GitConfigPath)
 	_, err2 := os.Stat(HookDir)
-	_, err3 := os.Stat(CommitMsgPath)
-	_, err4 := os.Stat(GithooksConfigPath)
+	_, err3 := os.Stat(HookConfigDir)
+	_, err4 := os.Stat(CommitMsgPath)
+	_, err5 := os.Stat(GithooksConfigPath)
 
 	switch {
 	case err1 != nil:
@@ -39,17 +40,21 @@ func CheckConfigFiles() {
 		os.Exit(1)
 
 	case err3 != nil:
-		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", CommitMsgPath)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", HookConfigDir)
 		os.Exit(1)
 
 	case err4 != nil:
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", CommitMsgPath)
+		os.Exit(1)
+
+	case err5 != nil:
 		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GithooksConfigPath)
 		os.Exit(1)
 	}
 }
 
 func previewGitConfigFile(workspace *Workspace) {
-	viewHeader := "========================== .gitconfig ==========================\n"
+	viewHeader := "========================== ~/" + GitConfigFilename + " ==========================\n"
 	bContent, err := ReadFile(GitConfigPath)
 	if err != nil {
 		fmt.Printf("Git configuration file %s doesn't exist, please setup git first.\n", GitConfigPath)
@@ -65,7 +70,7 @@ func previewGitConfigFile(workspace *Workspace) {
 }
 
 func previewWorkspaceGitConfig(workspace *Workspace) {
-	viewHeader := "========================== .gitconfig-" + strings.ToLower(workspace.Name) + " ==========================\n"
+	viewHeader := "========================== ~/" + GitHooksFolder + "/" + GitHooksConfigFolder + "/" + GitHooksConfigPraefix + "-" + strings.ToLower(workspace.Name) + " ==========================\n"
 	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + HooksConfigTmpl)
 	CheckError(err)
 	err = tmpl.Execute(os.Stdout, workspace)
@@ -79,16 +84,16 @@ func persistConfigAsJson(workspace *Workspace) {
 }
 
 func createWorkspaceGitConfig(workspace *Workspace) {
-	gitConfigPath := GitConfigPath + "-" + strings.ToLower(workspace.Name)
+	workspaceGitConfigPath := HookConfigDir + "/" + GitHooksConfigPraefix + "-" + strings.ToLower(workspace.Name)
 	tmpl, err := template.New("jira-config").Parse(HooksConfigTmpl)
 	CheckError(err)
-	f, err := os.Create(gitConfigPath)
+	f, err := os.Create(workspaceGitConfigPath)
 	CheckError(err)
 	err = tmpl.Execute(f, workspace)
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)
-	fmt.Println(promptui.IconGood+"  Create new file:", gitConfigPath)
+	fmt.Println(promptui.IconGood+"  Create new file:", workspaceGitConfigPath)
 }
 
 func updateGitConfigFile(workspace *Workspace) {

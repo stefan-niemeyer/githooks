@@ -41,7 +41,7 @@ func overwriteGitConfig(workspace *Workspace) {
 }
 
 func deleteWorkspaceGitConfig(wsName string) {
-	configPath := GitConfigPath + "-" + strings.ToLower(wsName)
+	configPath := HookConfigDir + "/" + GitHooksConfigPraefix + "-" + strings.ToLower(wsName)
 	err := os.Remove(configPath)
 	CheckError(err)
 }
