@@ -1,4 +1,6 @@
 # Official documentation at http://goreleaser.com
+version: 2
+
 project_name: githooks
 
 builds:
