@@ -40,7 +40,6 @@ snapshot:
   name_template: "{{ .Version }}-next-{{.ShortCommit}}"
 
 changelog:
-  skip: false
   sort: asc
 
 release:
