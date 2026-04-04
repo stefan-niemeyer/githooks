@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write # nötig, wenn eine Action PRs erstellt/updated
+  pull-requests: write
 
 jobs:
   goreleaser:
@@ -37,7 +37,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
           args: ${{ steps.grargs.outputs.args }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
