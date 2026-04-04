@@ -22,10 +22,16 @@ To simplify the installation and creation of the folders and files needed, you c
 CLI tool. It is a command line application that is developed with Go.  
 Once it is built, you can run it directly.
 
+## Linux / macOS Installation
 ```shell
 $ curl -sfL https://raw.githubusercontent.com/stefan-niemeyer/githooks/main/install.sh | sh
 $ chmod +x githooks
 $ mv githooks <folder-in-your-PATH>
+```
+
+## Windows Installation
+```
+irm https://raw.githubusercontent.com/stefan-niemeyer/githooks/main/install.ps1 | iex
 ```
 
 ## 1.1 Initialization
