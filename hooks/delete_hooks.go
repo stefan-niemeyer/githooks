@@ -3,14 +3,14 @@ package hooks
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"strings"
+	"text/template"
+
 	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
-	. "io/ioutil"
-	"os"
-	"strings"
-	"text/template"
 )
 
 func DeleteSelectedWorkspace(ghConfig *GitHookConfig, idx int) {
@@ -23,7 +23,7 @@ func DeleteSelectedWorkspace(ghConfig *GitHookConfig, idx int) {
 }
 
 func overwriteGitConfig(workspace *Workspace) {
-	bytesRead, _ := ReadFile(GitConfigPath)
+	bytesRead, _ := os.ReadFile(GitConfigFile)
 	gitConfigContent := string(bytesRead)
 	var partToReplace bytes.Buffer
 	tmpl, err := template.New("original").Funcs(template.FuncMap{
@@ -32,7 +32,7 @@ func overwriteGitConfig(workspace *Workspace) {
 	CheckError(err)
 	err = tmpl.Execute(&partToReplace, workspace)
 	newGitConfigContent := strings.Replace(gitConfigContent, partToReplace.String(), "", -1)
-	f, err := os.OpenFile(GitConfigPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	f, err := os.OpenFile(GitConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	CheckError(err)
 	_, err = f.Write([]byte(newGitConfigContent))
 	CheckError(err)
@@ -41,7 +41,7 @@ func overwriteGitConfig(workspace *Workspace) {
 }
 
 func deleteWorkspaceGitConfig(wsName string) {
-	configPath := HookConfigDir + "/" + GitHooksConfigPraefix + "-" + strings.ToLower(wsName)
+	configPath := HookConfigDir + "/" + GitHooksConfigPrefix + "-" + strings.ToLower(wsName)
 	err := os.Remove(configPath)
 	CheckError(err)
 }

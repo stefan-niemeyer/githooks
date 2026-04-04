@@ -2,13 +2,14 @@ package hooks
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/manifoldco/promptui"
 	"github.com/stefan-niemeyer/githooks/buildInfo"
 	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
-	"os"
-	"text/template"
 )
 
 func InitHooks() GitHookConfig {
@@ -19,33 +20,24 @@ func InitHooks() GitHookConfig {
 	CreateDirIfNotExists(HookDir)
 	CreateDirIfNotExists(HookConfigDir)
 
-	_, errorGitConfig := os.Stat(GitConfigPath)
+	_, errorGitConfig := os.Stat(GitConfigFile)
 	if errorGitConfig != nil {
-		f, err := os.Create(GitConfigPath)
+		f, err := os.Create(GitConfigFile)
 		CheckError(err)
-		err = os.Chmod(GitConfigPath, 0644)
+		err = os.Chmod(GitConfigFile, 0644)
 		CheckError(err)
 		err = f.Close()
 		CheckError(err)
-		fmt.Println(promptui.IconGood+"  Created file", GitConfigPath)
+		fmt.Println(promptui.IconGood+"  Created file", GitConfigFile)
 	}
 
-	_, errorMsg := os.Stat(CommitMsgPath)
-	if errorMsg != nil {
-		tmpl, err := template.New(".githooks").Parse(CommitMsg)
-		f, err := os.Create(CommitMsgPath)
-		CheckError(err)
-		err = os.Chmod(CommitMsgPath, 0755)
-		CheckError(err)
-		err = tmpl.Execute(f, &ghConfig)
-		CheckError(err)
-		err = f.Close()
-		CheckError(err)
-		fmt.Println(promptui.IconGood+"  Created file", CommitMsgPath)
-	}
+	// we copy the file again under Windows do assure that githooks and its copy have the same version
+	abs, err := filepath.Abs(os.Args[0])
+	CheckError(err)
+	CloneOrLink(abs, CommitMsgFile, 0755)
 
 	WriteGitHooksConfig(&ghConfig)
-	fmt.Println(promptui.IconGood+"  Created file", GithooksConfigPath)
+	fmt.Println(promptui.IconGood+"  Created file", GithooksConfigFile)
 
 	return ghConfig
 }

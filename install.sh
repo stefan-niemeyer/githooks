@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 OSTYPE=""
 ARCH=""
 DOWNLOAD_URL=""
 
 if [ -z "${OSTYPE}" ]; then
-  case $(uname) in
+  case "$(uname)" in
   "Linux")
     OSTYPE="linux"
     ;;
@@ -57,7 +57,7 @@ fi
 if command -v tar >/dev/null 2>&1
 then
   tar -xzf "${filename}"
-  echo "Installation Complete! Please copy githooks in a folder in your PATH"
+  echo "Installation complete! Please copy githooks to a folder in your PATH"
 else
   echo -e "$filename Download complete!\nUnpacking ${filename} failed."
   echo "tar: command not found, please unpack ${filename} manually."

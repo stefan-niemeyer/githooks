@@ -39,7 +39,7 @@ func GetBuildInfo() BuildInfo {
 func (v BuildInfo) ToString() string {
 	j, err := json.Marshal(v)
 	if err != nil {
-		log.Fatalf("Error occured during marshaling. Error: %s", err.Error())
+		log.Fatalf("Error occurred during marshaling. Error: %s", err.Error())
 	}
 	return fmt.Sprintf("%+v", string(j))
 }

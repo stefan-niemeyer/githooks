@@ -1,9 +1,14 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
+	"io/fs"
 	"os"
+	"runtime"
+
+	"github.com/manifoldco/promptui"
+	"github.com/spf13/cobra"
 )
 
 func CheckError(e error) {
@@ -44,4 +49,27 @@ func CreateDirIfNotExists(dirName string) bool {
 		return true
 	}
 	return true
+}
+
+func CloneOrLink(src, dst string, mode fs.FileMode) {
+	if runtime.GOOS == "windows" {
+		// real copy
+		data, err := os.ReadFile(src)
+		CheckError(err)
+		err = os.WriteFile(dst, data, mode)
+		CheckError(err)
+		fmt.Println(promptui.IconGood+"  Created copy", dst)
+	} else {
+		err := os.Remove(dst)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			CheckError(err)
+		}
+
+		// symlink on not-Windows
+		err = os.Symlink(src, dst)
+		CheckError(err)
+		err = os.Chmod(dst, mode)
+		CheckError(err)
+		fmt.Println(promptui.IconGood+"  Created link", dst)
+	}
 }

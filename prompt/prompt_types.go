@@ -1,8 +1,9 @@
-package types
+package prompt
 
 import (
 	"errors"
 	"fmt"
+
 	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/utils"
 )
@@ -12,9 +13,9 @@ type Dialog struct {
 	Label    string
 }
 
-func GetPromptInput(pc Dialog, defaultInput string) string {
+func GetPromptInput(pc Dialog, defaultInput string, allowEmpty bool) string {
 	validate := func(input string) error {
-		if len(input) == 0 && len(defaultInput) == 0 {
+		if len(input) == 0 && len(defaultInput) == 0 && allowEmpty == false {
 			return errors.New(pc.ErrorMsg)
 		}
 		return nil

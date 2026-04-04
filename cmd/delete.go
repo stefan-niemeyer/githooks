@@ -2,49 +2,38 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/manifoldco/promptui"
-	. "github.com/stefan-niemeyer/githooks/config"
-	. "github.com/stefan-niemeyer/githooks/hooks"
-	. "github.com/stefan-niemeyer/githooks/types"
-	. "github.com/stefan-niemeyer/githooks/utils"
 	"os"
 	"strings"
+
+	"github.com/manifoldco/promptui"
+	. "github.com/stefan-niemeyer/githooks/hooks"
+	. "github.com/stefan-niemeyer/githooks/prompt"
+	. "github.com/stefan-niemeyer/githooks/styles"
+	. "github.com/stefan-niemeyer/githooks/types"
+	. "github.com/stefan-niemeyer/githooks/utils"
 
 	"github.com/spf13/cobra"
 )
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete a githooks workspace and its settings.",
+	Short: "Delete a githooks workspace and its settings",
 	Long:  `Delete a githooks workspace and its settings`,
 	Run: func(cmd *cobra.Command, args []string) {
 		CheckConfigFiles()
 
 		ghConfig := ReadGitHooksConfig()
 		empty := Workspace{Name: "Quit"}
+		preselectIdx := GetWorkspaceIndex(ghConfig.Workspaces)
 		workspaces := append(ghConfig.Workspaces, empty)
-
-		templates := &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "➣ {{ .Name | cyan }}",
-			Inactive: "  {{ .Name | cyan }}",
-			Selected: "➣ {{ .Name | red | cyan }}",
-			Details:  DetailTmpl,
-		}
-
-		searcher := func(input string, index int) bool {
-			workspace := workspaces[index]
-			name := strings.Replace(strings.ToLower(workspace.Name), " ", "", -1)
-			input = strings.Replace(strings.ToLower(input), " ", "", -1)
-			return strings.Contains(name, input)
-		}
 
 		prompt1 := promptui.Select{
 			Label:     "Delete:",
 			Items:     workspaces,
-			Templates: templates,
+			Templates: GetDefaultSelectTemplates(),
 			Size:      5,
-			Searcher:  searcher,
+			Searcher:  NewWorkspaceSearcher(workspaces),
+			CursorPos: preselectIdx,
 		}
 
 		i, _, err := prompt1.Run()

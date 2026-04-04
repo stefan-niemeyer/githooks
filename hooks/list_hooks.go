@@ -1,10 +1,11 @@
 package hooks
 
 import (
-	. "github.com/stefan-niemeyer/githooks/types"
-	. "github.com/stefan-niemeyer/githooks/utils"
 	"os"
 	"strings"
+
+	. "github.com/stefan-niemeyer/githooks/types"
+	. "github.com/stefan-niemeyer/githooks/utils"
 )
 
 func GetWorkspaceIndex(workspaces []Workspace) int {

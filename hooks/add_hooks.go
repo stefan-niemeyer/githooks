@@ -2,14 +2,14 @@ package hooks
 
 import (
 	"fmt"
+	"os"
+	"strings"
+	"text/template"
+
 	"github.com/manifoldco/promptui"
 	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
-	. "io/ioutil"
-	"os"
-	"strings"
-	"text/template"
 )
 
 func AddWorkspace(newWorkspace *Workspace) {
@@ -24,15 +24,15 @@ func PreviewConfig(newWorkspace *Workspace) {
 }
 
 func CheckConfigFiles() {
-	_, err1 := os.Stat(GitConfigPath)
+	_, err1 := os.Stat(GitConfigFile)
 	_, err2 := os.Stat(HookDir)
 	_, err3 := os.Stat(HookConfigDir)
-	_, err4 := os.Stat(CommitMsgPath)
-	_, err5 := os.Stat(GithooksConfigPath)
+	_, err4 := os.Stat(CommitMsgFile)
+	_, err5 := os.Stat(GithooksConfigFile)
 
 	switch {
 	case err1 != nil:
-		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GitConfigPath)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GitConfigFile)
 		os.Exit(1)
 
 	case err2 != nil:
@@ -44,20 +44,20 @@ func CheckConfigFiles() {
 		os.Exit(1)
 
 	case err4 != nil:
-		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", CommitMsgPath)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", CommitMsgFile)
 		os.Exit(1)
 
 	case err5 != nil:
-		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GithooksConfigPath)
+		fmt.Printf(promptui.IconBad+" File %s doesn't exist, please execute 'githooks init' first.\n", GithooksConfigFile)
 		os.Exit(1)
 	}
 }
 
 func previewGitConfigFile(workspace *Workspace) {
 	viewHeader := "========================== ~/" + GitConfigFilename + " ==========================\n"
-	bContent, err := ReadFile(GitConfigPath)
+	bContent, err := os.ReadFile(GitConfigFile)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup git first.\n", GitConfigPath)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup git first.\n", GitConfigFile)
 		os.Exit(1)
 	}
 	configContent := string(bContent)
@@ -70,7 +70,7 @@ func previewGitConfigFile(workspace *Workspace) {
 }
 
 func previewWorkspaceGitConfig(workspace *Workspace) {
-	viewHeader := "========================== ~/" + GitHooksFolder + "/" + GitHooksConfigFolder + "/" + GitHooksConfigPraefix + "-" + strings.ToLower(workspace.Name) + " ==========================\n"
+	viewHeader := "========================== ~/" + GitHooksFolder + "/" + GitHooksConfigFolder + "/" + GitHooksConfigPrefix + "-" + strings.ToLower(workspace.Name) + " ==========================\n"
 	tmpl, err := template.New("simple-jira-config").Parse(viewHeader + HooksConfigTmpl)
 	CheckError(err)
 	err = tmpl.Execute(os.Stdout, workspace)
@@ -84,7 +84,7 @@ func persistConfigAsJson(workspace *Workspace) {
 }
 
 func createWorkspaceGitConfig(workspace *Workspace) {
-	workspaceGitConfigPath := HookConfigDir + "/" + GitHooksConfigPraefix + "-" + strings.ToLower(workspace.Name)
+	workspaceGitConfigPath := HookConfigDir + "/" + GitHooksConfigPrefix + "-" + strings.ToLower(workspace.Name)
 	tmpl, err := template.New("jira-config").Parse(HooksConfigTmpl)
 	CheckError(err)
 	f, err := os.Create(workspaceGitConfigPath)
@@ -97,9 +97,9 @@ func createWorkspaceGitConfig(workspace *Workspace) {
 }
 
 func updateGitConfigFile(workspace *Workspace) {
-	bContent, err := ReadFile(GitConfigPath)
+	bContent, err := os.ReadFile(GitConfigFile)
 	if err != nil {
-		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigPath)
+		fmt.Printf("Git configuration file %s doesn't exist, please setup this first.\n", GitConfigFile)
 		os.Exit(1)
 	}
 	configContent := string(bContent)
@@ -107,11 +107,11 @@ func updateGitConfigFile(workspace *Workspace) {
 		"toLower": strings.ToLower,
 	}).Parse(configContent + GitConfigPatch)
 	CheckError(err)
-	f, err := os.Create(GitConfigPath)
+	f, err := os.Create(GitConfigFile)
 	CheckError(err)
 	err = tmpl.Execute(f, workspace)
 	CheckError(err)
 	err = f.Close()
 	CheckError(err)
-	fmt.Println(promptui.IconGood+"  Updated file:", GitConfigPath)
+	fmt.Println(promptui.IconGood+"  Updated file:", GitConfigFile)
 }

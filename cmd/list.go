@@ -3,16 +3,16 @@ package cmd
 import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	. "github.com/stefan-niemeyer/githooks/config"
 	. "github.com/stefan-niemeyer/githooks/hooks"
+	. "github.com/stefan-niemeyer/githooks/prompt"
+	. "github.com/stefan-niemeyer/githooks/styles"
 	. "github.com/stefan-niemeyer/githooks/types"
 	. "github.com/stefan-niemeyer/githooks/utils"
-	"strings"
 )
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all workspaces managed by githooks.",
+	Short: "List all workspaces managed by githooks",
 	Long:  `List all workspaces managed by githooks`,
 	Run: func(cmd *cobra.Command, args []string) {
 		CheckConfigFiles()
@@ -20,28 +20,14 @@ var listCmd = &cobra.Command{
 		ghConfig := ReadGitHooksConfig()
 		empty := Workspace{Name: "Quit"}
 		preselectIdx := GetWorkspaceIndex(ghConfig.Workspaces)
-		ghConfig.Workspaces = append(ghConfig.Workspaces, empty)
-		templates := &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "➣ {{ .Name | cyan }}",
-			Inactive: "  {{ .Name | cyan }}",
-			Selected: "➣ {{ .Name | red | cyan }}",
-			Details:  DetailTmpl,
-		}
-
-		searcher := func(input string, index int) bool {
-			workspace := ghConfig.Workspaces[index]
-			name := strings.Replace(strings.ToLower(workspace.Name), " ", "", -1)
-			input = strings.Replace(strings.ToLower(input), " ", "", -1)
-			return strings.Contains(name, input)
-		}
+		workspaces := append(ghConfig.Workspaces, empty)
 
 		prompt := promptui.Select{
 			Label:     "Active githooks workspaces:",
-			Items:     ghConfig.Workspaces,
-			Templates: templates,
+			Items:     workspaces,
+			Templates: GetDefaultSelectTemplates(),
 			Size:      5,
-			Searcher:  searcher,
+			Searcher:  NewWorkspaceSearcher(workspaces),
 			CursorPos: preselectIdx,
 		}
 

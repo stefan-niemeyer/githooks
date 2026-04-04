@@ -3,6 +3,7 @@ package types
 type GitHooks struct {
 	Project  string
 	JiraName string
+	CMStyle  string
 	WorkDir  string
 }
 
@@ -12,7 +13,9 @@ type GitHookConfig struct {
 }
 
 type Workspace struct {
-	Name         string `json:"name,omitempty"`
-	ProjectKeyRE string `json:"projectKeyRE,omitempty"`
-	Folder       string `json:"folder,omitempty"`
+	Name               string `json:"name,omitempty"`
+	ProjectKeyRE       string `json:"projectKeyRE,omitempty"`
+	CommitMessageStyle string `json:"commitMessageStyle,omitempty"`
+	AllowedTypes       string `json:"allowedtypes,omitempty"`
+	Folder             string `json:"folder,omitempty"`
 }

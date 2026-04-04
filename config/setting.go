@@ -2,32 +2,35 @@ package config
 
 import (
 	"os"
+	"runtime"
 )
 
 const GitHooksFolder = ".githooks"
 const GitHooksConfigFolder = "config"
-const GithooksLogName = "githooks.log"
 const GithooksConfigName = "githooks.json"
-const CommitMsgName = "commit-msg"
 const GitConfigFilename = ".gitconfig"
-const GitHooksConfigPraefix = "gitconfig"
+const GitHooksConfigPrefix = "gitconfig"
+const AllowedTypesDefault = "build,chore,ci,docs,feat,fix,ops,perf,refactor,style,test"
 
 var HomeDir, _ = os.UserHomeDir()
 var HookDir = HomeDir + "/" + GitHooksFolder
 var HookConfigDir = HookDir + "/" + GitHooksConfigFolder
-var GithooksLogPath = HookConfigDir + "/" + GithooksLogName
-var GithooksConfigPath = HookConfigDir + "/" + GithooksConfigName
-var CommitMsgPath = HookDir + "/" + CommitMsgName
-var GitConfigPath = HomeDir + "/" + GitConfigFilename
+var GithooksConfigFile = HookConfigDir + "/" + GithooksConfigName
+var CommitMsgFile = HookDir + "/" + CommitMsgName()
+var GitConfigFile = HomeDir + "/" + GitConfigFilename
 
 var GitConfigPatch = `[includeIf "gitdir:{{ .Folder }}"]
-    path = ` + GitHooksFolder + `/` + GitHooksConfigFolder + `/` + GitHooksConfigPraefix + `-{{ toLower .Name }}
+    path = ` + GitHooksFolder + `/` + GitHooksConfigFolder + `/` + GitHooksConfigPrefix + `-{{ toLower .Name }}
 `
 
 var HooksConfigTmpl = `[core]
     hooksPath=~/` + GitHooksFolder + `
 [user]
     jiraProjects={{ .ProjectKeyRE }}
+    commitMessageStyle={{ .CommitMessageStyle }}
+{{- if eq .CommitMessageStyle "conventional" }}
+    allowedTypes={{ .AllowedTypes }}
+{{- end }}
 `
 
 var DetailTmpl = `
@@ -36,5 +39,17 @@ var DetailTmpl = `
 Name: {{ .Name | faint }}
 Folder: {{ .Folder | faint }}
 Jira Project Key RegEx: {{ .ProjectKeyRE | faint }}
+Commit Message Style: {{ .CommitMessageStyle | faint }}
+{{- if eq .CommitMessageStyle "conventional" }}
+Allowed AllowedTypes: {{ .AllowedTypes | faint }}
+{{- end }}
 {{ end }}
 `
+
+func CommitMsgName() string {
+	if runtime.GOOS == "windows" {
+		return "commit-msg.exe"
+	}
+
+	return "commit-msg"
+}

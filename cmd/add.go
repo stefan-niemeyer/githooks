@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/manifoldco/promptui"
-	. "github.com/stefan-niemeyer/githooks/hooks"
-	. "github.com/stefan-niemeyer/githooks/types"
-	. "github.com/stefan-niemeyer/githooks/utils"
 	"os"
 	"strings"
+
+	"github.com/manifoldco/promptui"
+	. "github.com/stefan-niemeyer/githooks/hooks"
+	. "github.com/stefan-niemeyer/githooks/prompt"
+	. "github.com/stefan-niemeyer/githooks/styles"
+	. "github.com/stefan-niemeyer/githooks/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -20,40 +22,9 @@ var addCmd = &cobra.Command{
 
 		CheckConfigFiles()
 
-		projName := GetPromptInput(Dialog{
-			ErrorMsg: "Please provide a name for the workspace.",
-			Label:    "Enter your workspace name:",
-		}, "")
-
-		jiraName := strings.ToUpper(projName)
-		jiraName = GetPromptInput(Dialog{
-			ErrorMsg: "Please provide a Jira project key RegEx to track, e.g. ALPHA or (ALPHA|BETA)",
-			Label:    fmt.Sprintf("Enter your Jira project key RegEx (%s):", jiraName),
-		}, jiraName)
-
 		cwd, errCwd := os.Getwd()
 		CheckError(errCwd)
-		homeDir, err := os.UserHomeDir()
-		if err == nil && len(homeDir) != 0 {
-			cwd = strings.Replace(cwd, homeDir, "~", 1)
-		}
-		if !strings.HasSuffix(cwd, "/") {
-			cwd += "/"
-		}
-		workDir := GetPromptInput(Dialog{
-			ErrorMsg: "Please enter a path to your workspace.",
-			Label:    fmt.Sprintf("Enter path to your workspace (%s):", cwd),
-		}, cwd)
-
-		if !strings.HasSuffix(workDir, "/") {
-			workDir += "/"
-		}
-
-		newWorkspace := Workspace{
-			Name:         projName,
-			ProjectKeyRE: strings.ToUpper(jiraName),
-			Folder:       workDir,
-		}
+		newWorkspace := CreateWorkspace("", "", cwd, "", PlainBrackets)
 		PreviewConfig(&newWorkspace)
 
 		prompt := promptui.Prompt{
@@ -63,7 +34,7 @@ var addCmd = &cobra.Command{
 
 		confirmed, err := prompt.Run()
 		if err != nil {
-			fmt.Println(promptui.IconBad + " Canceled adding of a new githooks workspace.")
+			fmt.Println(promptui.IconBad + " Canceled adding of a new githooks workspace")
 		}
 
 		if strings.ToLower(confirmed) == "y" {
