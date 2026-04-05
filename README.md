@@ -3,7 +3,7 @@
 This repository includes a Git hook to prevent commits without a Jira issue key in the commit message.  
 Compliance with Conventional Commits can also be ensured.
 
-Git-generated merge commit messages that start with **Merge** are always accepted.
+Git-generated merge and revert commit messages that start with **Merge** or **revert** are always accepted.
 
 If you are working on a branch that contains an issue key in its name, for example `feature/DS-17`, the commit message will be enhanced with that issue key. There are several format styles available to choose how the issue key will be inserted.
 
