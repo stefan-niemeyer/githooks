@@ -10,7 +10,7 @@ const GitHooksConfigFolder = "config"
 const GithooksConfigName = "githooks.json"
 const GitConfigFilename = ".gitconfig"
 const GitHooksConfigPrefix = "gitconfig"
-const AllowedTypesDefault = "build,chore,ci,docs,feat,fix,ops,perf,refactor,style,test"
+const AllowedTypesDefault = "build,chore,ci,docs,feat,fix,ops,perf,refactor,revert,style,test"
 
 var HomeDir, _ = os.UserHomeDir()
 var HookDir = HomeDir + "/" + GitHooksFolder

@@ -3,7 +3,7 @@
 This repository includes a Git hook to prevent commits without a Jira issue key in the commit message.  
 Compliance with Conventional Commits can also be ensured.
 
-Git-generated merge and revert commit messages that start with **Merge** or **revert** are always accepted.
+Git-generated merge commit messages that start with **Merge** are always accepted.
 
 If you are working on a branch that contains an issue key in its name, for example `feature/DS-17`, the commit message will be enhanced with that issue key. There are several format styles available to choose how the issue key will be inserted.
 
@@ -133,6 +133,27 @@ For that purpose, `githooks` accepts a list of types that the commit message can
 
 This is defined per workspace, so you can adapt it to your needs.
 
+The `githook` command `types` (alias `show-types` prints a list of common types used for conventional commits,
+and when to use them.
+
+```
+$ githooks types
+build      Changes that affect the build system or external dependencies.
+chore      Routine maintenance tasks that do not affect application behavior.
+ci         Changes to continuous integration configuration or pipeline definitions.
+docs       Documentation-only changes.
+feat       Adds a new feature or user-facing functionality.
+fix        Fixes a bug or incorrect behavior.
+ops        Operational changes such as deployment, infrastructure, or monitoring updates.
+perf       Changes that improve performance.
+refactor   Code changes that restructure implementation without changing behavior.
+revert     Reverts a previous commit or change.
+style      Formatting or style-only changes that do not affect logic.
+test       Adds or updates tests without changing production behavior.
+```
+
+`githooks types <type>` will print an explanation for a single "type".
+
 ### Folder
 
 The configuration of a workspace is valid for all Git repositories in this folder and its subfolders.
@@ -205,7 +226,7 @@ They might look like this:
 [user]
     jiraProjects=ALPHA
     commitMessageStyle=conventional
-    allowedTypes=build,chore,ci,docs,feat,fix,ops,perf,refactor,style,test
+    allowedTypes=build,chore,ci,docs,feat,fix,ops,perf,refactor,revert,style,test
 ```
 
 The variable `core.hooksPath` is set to the folder with the shared hooks `~/.githooks`.

@@ -18,8 +18,8 @@ func CommitMsg(filename string) {
 	utils.CheckError(err)
 	msg := string(msgRaw)
 
-	// Don't touch merge and revert commits
-	if strings.HasPrefix(msg, "Merge") || strings.HasPrefix(msg, "Revert") {
+	// Don't touch merge  commits
+	if strings.HasPrefix(msg, "Merge") {
 		os.Exit(0)
 	}
 
