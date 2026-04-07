@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -54,11 +55,13 @@ func CreateDirIfNotExists(dirName string) bool {
 func CloneOrLink(src, dst string, mode fs.FileMode) {
 	if runtime.GOOS == "windows" {
 		// real copy
-		data, err := os.ReadFile(src)
+		srcExe := addExeIfNeeded(src)
+		data, err := os.ReadFile(srcExe)
 		CheckError(err)
-		err = os.WriteFile(dst, data, mode)
+		dstExe := addExeIfNeeded(dst)
+		err = os.WriteFile(dstExe, data, mode)
 		CheckError(err)
-		fmt.Println(promptui.IconGood+"  Created copy", dst)
+		fmt.Println(promptui.IconGood+"  Created copy", dstExe)
 	} else {
 		err := os.Remove(dst)
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -72,4 +75,12 @@ func CloneOrLink(src, dst string, mode fs.FileMode) {
 		CheckError(err)
 		fmt.Println(promptui.IconGood+"  Created link", dst)
 	}
+}
+
+func addExeIfNeeded(s string) string {
+	exeLower := ".exe"
+	if strings.HasSuffix(strings.ToLower(s), exeLower) {
+		return s
+	}
+	return s + exeLower
 }
