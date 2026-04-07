@@ -29,7 +29,11 @@ func CommitMsg(filename string) {
 	ticketRE := reFromProjects(jiraProjects)
 
 	branch := utils.GetCurrentBranch()
-	branchTicket := strings.ToUpper(ticketRE.FindString(branch))
+	branchTicket := ""
+	branchMatch := ticketRE.FindStringSubmatch(branch)
+	if len(branchMatch) > 1 {
+		branchTicket = strings.ToUpper(branchMatch[1])
+	}
 
 	commitMessageStyle := utils.GetGitConfigValue("user.commitMessageStyle")
 	cmStyle, errStyles := styles.ParseFormatStyle(commitMessageStyle)
@@ -81,7 +85,7 @@ func CommitMsg(filename string) {
 
 func reFromProjects(jiraProjects string) *regexp.Regexp {
 	if len(jiraProjects) == 0 {
-		return regexp.MustCompile("\\b[[:alpha:]][[:alnum:]]*-[[:digit:]]+\\b")
+		return regexp.MustCompile(`(?:^|[^[:alnum:]])([[:alpha:]][[:alnum:]]*-[[:digit:]]+)(?:$|[^[:alnum:]])`)
 	}
-	return regexp.MustCompile("\\b" + jiraProjects + "-[[:digit:]]+\\b")
+	return regexp.MustCompile(`(?:^|[^[:alnum:]])(` + jiraProjects + `*-[[:digit:]]+)(?:$|[^[:alnum:]])`)
 }
